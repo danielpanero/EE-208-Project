@@ -5,11 +5,18 @@
 .org 0
     rjmp reset
 
+
+.org ADCCaddr
+	jmp	analog_service_routine
+
+
 .include "lcd.asm"	
 .include "printf.asm"
 .include "uart.asm"
-.include "sound.asm"
 .include "debug.asm"
+
+.include "sound.asm"
+.include "analog.asm"
 
 reset:
     LDSP RAMEND ; Load stack pointer SP
@@ -19,15 +26,16 @@ reset:
     rcall LCD_init ; Init lcd.asm library
     rcall UART0_init ; Init uart.asm
     rcall sound_init ; Init sound.asm library
-    OUTI DDRB, 0 ; configure portD as input
+    rcall analog_init ; Init analog.asm library
+
+    OUTI DDRB, 1 ; Configure portD as input
     rjmp main
 
 
 main:
     LDI2 durationh, durationl, 11000
 
-    SP1 PIND, 0
-    LDI2 periodh, periodl, do
+    rcall analog_loop
 
     SP1 PIND, 1
     LDI2 periodh, periodl, re
