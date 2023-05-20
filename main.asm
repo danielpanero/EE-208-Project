@@ -8,8 +8,9 @@
 .include "sound.asm"
 
 reset:
-    LDSP RAMEND ; load stack pointer SP
-    sbi	DDRE,SPEAKER ; make pin SPEAKER an output
+    LDSP RAMEND ; Load stack pointer SP
+    sei ; Activate interrupts
+    rcall sound_init ; Init sound.asm library
     OUTI DDRB, 0 ; configure portD as input
     rjmp main
 

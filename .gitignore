@@ -1,3 +1,4 @@
 *.hex
 *.lst
 *.eep.hex
+*.obj
