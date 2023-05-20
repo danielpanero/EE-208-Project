@@ -5,11 +5,19 @@
 .org 0
     rjmp reset
 
+.include "lcd.asm"	
+.include "printf.asm"
+.include "uart.asm"
 .include "sound.asm"
+.include "debug.asm"
 
 reset:
     LDSP RAMEND ; Load stack pointer SP
     sei ; Activate interrupts
+
+    ; Library initializations: 
+    rcall LCD_init ; Init lcd.asm library
+    rcall UART0_init ; Init uart.asm
     rcall sound_init ; Init sound.asm library
     OUTI DDRB, 0 ; configure portD as input
     rjmp main
