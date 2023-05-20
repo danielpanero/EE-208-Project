@@ -1,8 +1,8 @@
 ; Analog deconding library for SHARP GPS2Y0A21
 
-.def analogl = r12
-.def analogh = r13
-.def analog_flag = r14
+.def analogl = r18
+.def analogh = r19
+.def analog_flag = r20
 
 .equ ANLFINISHED = 0
 .equ ANLREQUESTED = 1
