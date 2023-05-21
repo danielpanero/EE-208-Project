@@ -2,9 +2,9 @@
 ; in  period (r8)         period in 10 us unit
 ;     durationh:durationl (r11:r10)   duration of the note in 10us
 ; TODO remove scratch register using the stack
-; TODO durationl:durationh should be read from the EEPROM
+; TODO durationl:durationh should be read only one register and possible read from the EEPROM
 ; TODO recalibrate frequencies
-; TODO finish writing scales
+; TODO finish writing scales and subroutine to point to the right scale
 
 .def  period = r8
 .def _period = r9 ; Scratch register (values are preserved via the stack)
@@ -28,8 +28,8 @@ sound_on:
 sound_loop:
   WAIT_US 9
   ; 4 cycles = 1us
-  dec period ; 1 cycles
-  tst period ; 1 cycles
+  dec _period ; 1 cycles
+  tst _period ; 1 cycles
   brne sound_loop ; 2 cycles
 
   INVP  PORTE,SPEAKER
