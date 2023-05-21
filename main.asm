@@ -144,24 +144,21 @@ play_from_record:
 
 ; Plays a note selected using scale selection and the index of note (preloaded)
 ; TODO implement scale selection
-; TODO remove durationh:durationl
+; TODO Implement screen text
 play_note:
     ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
-    LDIZ 2*(notes_tbl_la)
+    LDIZ 2*(notes_tbl_do)
     ADDZ note_index
 
     lpm
 
     mov period, r0
 
-    _LDI durationh, high(11000)
-    _LDI durationl, low(11000)
-
     rcall sound
     ret
 
 
-; TODO better transition between notes / more stable transition (increasing the length of the note?)
+; TODO better transition between notes / more stable transition (increasing the length of the note / adding 10% margin before switching)
 loop_normalize_note_index:
     inc note_index
 

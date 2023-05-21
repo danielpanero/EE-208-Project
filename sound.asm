@@ -1,16 +1,15 @@
 ; Piezoelectric library for sound
 ; in  period (r8)         period in 10 us unit
-;     durationh:durationl (r11:r10)   duration of the note in 10us
 ; TODO remove scratch register using the stack
-; TODO durationl:durationh should be read only one register and possible read from the EEPROM
+; TODO durationl:durationh should be read from the EEPROM
 ; TODO recalibrate frequencies
 ; TODO finish writing scales and subroutine to point to the right scale
 
 .def  period = r8
 .def _period = r9 ; Scratch register (values are preserved via the stack)
 
-.def  durationl = r10
-.def  durationh = r11
+.def  durationl = r23
+.def  durationh = r24
 
 sound_init:
   sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
@@ -18,9 +17,15 @@ sound_init:
 
 sound:
   push _period ; Saving values of the scratch register
+  push durationl
+  push durationh
+
+  ldi durationl, low(50000)
+  ldi durationh, high(50000)
 
   tst period ; Testing if 0 --> pause
-  breq sound_off
+  brne PC+2
+  rjmp sound_off
 
 sound_on:
   mov _period, period ; Copying into scratch register
@@ -35,10 +40,12 @@ sound_loop:
   INVP  PORTE,SPEAKER
 
   sub durationl, period
-  brsh PC+4 ; C = 0 (durationl > period)
-  _subi durationh, 1 ; C = 1 (durationl < period)
+  brsh PC+2 ; C = 0 (durationl > period)
+  subi durationh, 1 ; C = 1 (durationl < period)
   brcc PC+2 ; C = 0 (period - duration > 0)
   rjmp sound_restore_registers ; C=1 (period - duration < 0)
+
+  ;DBREGSF "Duration left", FDEC2, durationh, durationl
 
   tst durationh 
   brne PC+2 ; Z= 0 (period > 0)
@@ -56,6 +63,8 @@ sound_off:
   rjmp sound_restore_registers
 
 sound_restore_registers:
+  pop durationh
+  pop durationl
   pop _period
   ret
 
