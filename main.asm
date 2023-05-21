@@ -44,7 +44,7 @@ main:
     mov b0, note_index
 
     ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
-    LDIZ 2*(notes_tbl)
+    LDIZ 2*(notes_tbl_la)
     ADDZ note_index
 
     lpm
