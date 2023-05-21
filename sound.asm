@@ -1,6 +1,8 @@
 ; Piezoelectric library for sound
 ; in  period (r8)         period in 10 us unit
 ;     durationh:durationl (r11:r10)   duration of the note in 10us
+; TODO remove scratch register using the stack
+; TODO durationl:durationh should be read from the EEPROM
 
 .def  period = r8
 .def _period = r9 ; Scratch register (values are preserved via the stack)

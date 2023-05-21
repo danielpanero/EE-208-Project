@@ -1,4 +1,5 @@
 ; Debugging library using the UART interface
+; TODO UART with buffer to speed up to the print without stopping the main loop
 
 .define DEBUG 1
 
