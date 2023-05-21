@@ -20,8 +20,8 @@ sound:
   push durationl
   push durationh
 
-  ldi durationl, low(50000)
-  ldi durationh, high(50000)
+  ldi durationl, low(35000)
+  ldi durationh, high(35000)
 
   tst period ; Testing if 0 --> pause
   brne PC+2
