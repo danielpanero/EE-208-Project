@@ -1,13 +1,13 @@
 ; Debugging library using the UART interface
 
-.define DEBUG 0
+.define DEBUG 1
 
 .if DEBUG == 1
 ; Write a message into the console
 ; - @0 message
 .macro DBMSG
     PRINTF	UART0_putc
-    .db	CR, @0, CR, 0
+    .db	CR, @0, 0
 
 .endmacro
 
@@ -21,7 +21,7 @@
     clr a1
 
     PRINTF	UART0_putc
-    .db	CR, @0, FBIN, a, CR, 0
+    .db	CR, @0, FBIN, a, 0
 
     out SREG, a0
     pop a0
@@ -40,7 +40,7 @@
     clr a1
 
     PRINTF	UART0_putc
-    .db	CR, @0, FBIN, a, CR, 0
+    .db	CR, @0, FBIN, a, 0
 
     pop a0
     pop a1
@@ -57,7 +57,7 @@
     clr a1
 
     PRINTF	UART0_putc
-    .db	CR, @0, @1, a, CR, 0
+    .db	CR, @0, @1, a, 0
 
     pop a0
     pop a1
@@ -75,7 +75,7 @@
     mov a0, @2
 
     PRINTF	UART0_putc
-    .db	CR, @0, FBIN, a, CR, 0
+    .db	CR, @0, FBIN, a, 0
 
     pop a0
     pop a1
@@ -94,7 +94,7 @@
     mov a0, @3
 
     PRINTF	UART0_putc
-    .db	CR, @0, @1, a, CR, 0
+    .db	CR, @0, @1, a, 0
 
     pop a0
     pop a1
@@ -111,7 +111,7 @@
     clr a1
 
     PRINTF	UART0_putc
-    .db	CR, @0, FBIN, a, CR, 0
+    .db	CR, @0, FBIN, a, 0
 
     pop a0
     pop a1
