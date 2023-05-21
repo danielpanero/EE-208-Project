@@ -1,12 +1,9 @@
 ; Piezoelectric library for sound
-; in  periodh:periodl (r9:r8)         period in 10 us unit
+; in  period (r8)         period in 10 us unit
 ;     durationh:durationl (r11:r10)   duration of the note in 10us
 
-.def  periodl = r8
-.def  periodh = r9
-
-.def _periodl = r12
-.def _periodh = r13
+.def  period = r8
+.def _period = r9 ; Scratch register (values are preserved via the stack)
 
 .def  durationl = r10
 .def  durationh = r11
@@ -16,31 +13,33 @@ sound_init:
   ret
 
 sound:
-; in  periodh:periodl (r9:r8)         period in 10 us unit
-;     durationh:durationl (r11:r10)   duration of the note in 10us
-  TST2 periodh, periodl ; Testing if 0 --> pause
+  push _period ; Saving values of the scratch register
+
+  tst period ; Testing if 0 --> pause
   breq sound_off
 
 sound_on:
-  MOV2 _periodh, _periodl, periodh, periodl ; Copying into scratch registers
-  ;LSR2 _periodh, _periodl ; Divide by two to adjust ON/OFF period 
+  mov _period, period ; Copying into scratch register
 
 sound_loop:
-  WAIT_US 8
-  ; 8 cycles = 2us
-  DEC2 _periodh, _periodl ; 3 cycles
-  TST2 _periodh, _periodl ; 3 cycles
+  WAIT_US 9
+  ; 4 cycles = 1us
+  dec period ; 1 cycles
+  tst period ; 1 cycles
   brne sound_loop ; 2 cycles
 
   INVP  PORTE,SPEAKER
 
-  CP2 durationh, durationl, periodh, periodl
-  brcc PC+2
-  ret ; C=1 (period - duration < 0)
-  brne PC+2
-  ret ; Z=1 (period - duration = 0)
+  sub durationl, period
+  brsh PC+4 ; C = 0 (durationl > period)
+  _subi durationh, 1 ; C = 1 (durationl < period)
+  brcc PC+2 ; C = 0 (period - duration > 0)
+  rjmp sound_restore_registers ; C=1 (period - duration < 0)
 
-  SUB2 durationh, durationl, periodh, periodl ; (period - duration >= 0)
+  tst durationh 
+  brne PC+2 ; Z= 0 (period > 0)
+  rjmp sound_restore_registers; Z=1 (period - duration = 0)
+
   rjmp sound_on 
 
 sound_off:
@@ -49,8 +48,12 @@ sound_off:
   DEC2 durationh, durationl ; 3 cycles
   TST2 durationh, durationl ; 3 cycles
   brne sound_off ; 2 cycles
-  ret
 
+  rjmp sound_restore_registers
+
+sound_restore_registers:
+  pop _period
+  ret
 
 .equ	do	= 100000/523
 .equ	dom	= 100000/554

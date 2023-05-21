@@ -48,11 +48,10 @@ main:
     ADDZ note_index
 
     lpm
-    clr periodh
 
-    mov periodl, r0
+    mov period, r0
     ;DBREGF "The note index: ", FDEC|FSIGN, note_index
-    ;DBREGF "The period: ", FDEC, periodl
+    ;DBREGF "The period: ", FDEC, period
 
     _LDI durationh, high(11000)
     _LDI durationl, low(11000)
