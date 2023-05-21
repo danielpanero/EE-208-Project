@@ -16,6 +16,9 @@
 .include "uart.asm"
 .include "debug.asm"
 
+; Global variables
+.def note_index = r21
+
 .include "sound.asm"
 .include "record.asm"
 .include "analog.asm"
@@ -35,10 +38,7 @@
 
 .equ PLAY_MODE_FREE = 0b00
 .equ PLAY_MODE_RECORD = 0b01
-.equ PLAY_MODE_FROM_RECORD = 0b10
-
-; Global variables
-.def note_index = r21
+.equ PLAY_MODE_FROM_RECORD = 0b11
 
 reset:
     LDSP RAMEND ; Load stack pointer SP
@@ -54,7 +54,7 @@ reset:
     OUTI DDRB, 1 ; LED
     OUTI DDRD, 0 ; Buttons
 
-    ldi status_flag, 0b0000000
+    ldi status_flag, 0b00000101
     rjmp main
 
 ; TODO Replace bit constant with correct equ
@@ -67,52 +67,63 @@ main:
     JP1 PIND, 2, PC+3
     INVB status_flag, 3
     
-    DBREG "Status flag 0:", status_flag
+    ;DBREG "Status flag 0:", status_flag
 
-    WAIT_MS 100 ; Rebound buttons
+    ;WAIT_MS 500 ; Rebound buttons
 
     push _status_flag ; Preserving scratch register content
 
     ;1. Determining the mode
     mov _status_flag, status_flag
     andi _status_flag, MODEMSK
-    DBREG "Status flag 1:", _status_flag
+    ;DBREG "Status flag 1:", _status_flag
 
-    cpi _status_flag, MODE_WAITING<<MODE ; Check if waiting
-    brne PC+3
+    cpi _status_flag, 0b00000000; Check if waiting
+    brne PC+4
     pop _status_flag
+    rcall waiting
     rjmp main
 
     ;2. Determining the play mode
     mov _status_flag, status_flag
     andi _status_flag, PLAY_MODEMSK
-    DBREG "Status flag 2:", _status_flag
+    ;DBREG "Status flag 2:", _status_flag
 
     ;2.1. Check if play free mode
-    mov _status_flag, status_flag
-    cpi _status_flag, PLAY_MODE_FREE<<PLAY_MODE
+    cpi _status_flag, 0b00000000
     brne PC+4
     pop _status_flag
     rcall play_free
     rjmp main
 
     ;2.2. Check if play and record mode
-    mov _status_flag, status_flag
-    cpi _status_flag, PLAY_MODE_RECORD<<PLAY_MODE
+    cpi _status_flag, 0b00000100
     brne PC+4
     pop _status_flag
     rcall play_and_record
     rjmp main
 
+    ;2.3. Check if play from record mode
+    cpi _status_flag, 0b00001100
+    brne PC+4
+    pop _status_flag
+    rcall play_from_record
+    rjmp main
 
     pop _status_flag
     rjmp main
 
+waiting:
+    ;DBMSG "Waiting"
+    PRINTF LCD_putc
+    .db CR,CR, "Waiting", "     ", CR, 0
+    ret
 
 ; Plays the sound with recording
 play_free:
-    DBMSG "Playing free"
-    ret
+    ;DBMSG "Playing free"
+    PRINTF LCD_putc
+    .db CR, CR, "Playing free", "     ", CR, 0
 
     rcall analog_loop
 
@@ -123,22 +134,38 @@ play_free:
 
 
 ; Plays the sound and records it
-; TODO implement buffer overflow
+; TODO implement buffer overflow mode 
+; TODO implement screen
 play_and_record:
-    DBMSG "Playing and recording"
-    ret
+    ;DBMSG "Playing and recording"
+    PRINTF LCD_putc
+    .db CR, CR, "Recording", "       ", CR, 0
 
-    rcall play_free
+    rcall analog_loop
+
+    clr note_index 
+    rcall loop_normalize_note_index
+    rcall play_note
+
     rcall record_push
+
+    brtc PC+2 ; If buffer didn't overflow
+    ldi status_flag, 0b00001101 ; If buffer overflew, changes back to waiting
+
     ret
 
 ; Plays the sound from the recording it
-; TODO implement buffer overflow
+; TODO implement buffer overflow mode
+; TODO implement screen
 play_from_record:
-    DBMSG "Play from record"
-    ret
+    ;DBMSG "Play from record"
+    PRINTF LCD_putc
+    .db CR, CR, "Play back", "     ", CR, 0
 
     rcall record_pop
+    brtc PC+2 ; If buffer didn't overflow
+    ldi status_flag, 0b00000000 ; If buffer overflew, changes back to waiting
+
     rcall play_note
     ret
 
