@@ -2,14 +2,14 @@
 ; in  periodh:periodl (r9:r8)         period in 10 us unit
 ;     durationh:durationl (r11:r10)   duration of the note in 10us
 
-.def  periodl = r18
-.def  periodh = r19
+.def  periodl = r8
+.def  periodh = r9
 
-.def _periodl = r22
-.def _periodh = r23
+.def _periodl = r12
+.def _periodh = r13
 
-.def  durationl = r20
-.def  durationh = r21
+.def  durationl = r10
+.def  durationh = r11
 
 sound_init:
   sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
@@ -78,5 +78,21 @@ sound_off:
 .equ	lam2	= lam/2
 .equ	si2	= si/2
 
+.equ	do3	= do/4
+.equ	dom3	= dom/4
+.equ	re3	= re/4
+.equ	rem3	= rem/4
+.equ	mi3	= mi/4
+.equ	fa3	= fa/4
+.equ	fam3	= fam/4
+.equ	so3	= so/4
+.equ	som3	= som/4
+.equ	la3	= la/4
+.equ	lam3	= lam/4
+.equ	si3	= si/4
+
+
+.equ notes_tbl_index_min = 0
+.equ notes_tbl_index_max = 7
 .cseg
-notes_tbl: .db do, dom, re, rem, mi, fa, fam, so, som, la, lam, si, do2, dom2, re2, rem2, mi2, fa2, fam2, so2, som2, la2, lam2, si2
+notes_tbl: .db do, re, mi, fa, so, la, si, do2

@@ -32,30 +32,52 @@ reset:
     rjmp main
 
 
-main:
-    LDI2 durationh, durationl, 11000
+.def note_index = r21
 
+main:   
     rcall analog_loop
 
-    SP1 PIND, 1
-    LDI2 periodh, periodl, re
+    clr note_index 
+    rcall loop_normalize_note_index
 
-    SP1 PIND, 2
-    LDI2 periodh, periodl, mi
+    clr b1
+    mov b0, note_index
 
-    SP1 PIND, 3
-    LDI2 periodh, periodl, fa
+    ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
+    LDIZ 2*(notes_tbl)
+    ADDZ note_index
 
-    SP1 PIND, 4
-    LDI2 periodh, periodl, so
+    lpm
+    clr periodh
 
-    SP1 PIND, 5
-    LDI2 periodh, periodl, la
+    mov periodl, r0
+    ;DBREGF "The note index: ", FDEC|FSIGN, note_index
+    ;DBREGF "The period: ", FDEC, periodl
 
-    SP1 PIND, 6
-    LDI2 periodh, periodl, si
+    _LDI durationh, high(11000)
+    _LDI durationl, low(11000)
 
     rcall sound
 
     rjmp main
 
+loop_normalize_note_index:
+    inc note_index
+
+    ;DBREGSF "Analog: ", FDEC2, analogh, analogl
+    SUBI2 analogh, analogl, analog_max_value / (notes_tbl_index_max+2)  ; We choosed to place a note every 40 dec
+    ;DBSREG "SREG: "
+    JC0 loop_normalize_note_index ; If analogh:analog_loop > 40, we can still make an higher note
+
+    dec note_index
+
+    cpi note_index, notes_tbl_index_min ; note_index must be >= 0
+    brsh PC+2 
+    ldi note_index, notes_tbl_index_min
+
+    cpi note_index, notes_tbl_index_max + 1 ; note_index must be <= 23
+    brlo PC+2
+    ldi note_index, notes_tbl_index_max
+
+    ;DBREGF "Final note found was: ", FDEC, note_index
+    ret

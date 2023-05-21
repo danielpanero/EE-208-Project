@@ -7,6 +7,8 @@
 .equ ANLFINISHED = 0
 .equ ANLREQUESTED = 1
 
+.equ analog_max_value = 1023
+
 analog_service_routine:
 	ldi	analog_flag, (1<<ANLFINISHED) + (1<<ANLREQUESTED) ; Set the flag	
 	reti 
