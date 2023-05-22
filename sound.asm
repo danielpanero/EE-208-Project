@@ -1,8 +1,6 @@
 ; Piezoelectric library for sound
 ; in  period (r8)         period in 10 us unit
 ; TODO finish writing scales and subroutine to point to the right scale
-; TODO durationl:durationh should be read from the EEPROM
-; TODO Replace duration asynchrone with a timer in order to let the microprosser do other things
 ; TODO remove scratch register using the stack
 ; TODO recalibrate frequencies
 
@@ -12,8 +10,21 @@
 .def  durationl = r23
 .def  durationh = r24
 
+.dseg
+duration_address: .byte 1
+
+.cseg
 sound_init:
   sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
+
+  push durationh
+  ;DBMSG duration_address
+  EEPROM_READ duration_address, durationh
+
+  ;DBREGF "Duration address 1:", FDEC, durationh
+  sts duration_address, durationh
+
+  pop durationh
   ret
 
 sound:
@@ -21,8 +32,10 @@ sound:
   push durationl
   push durationh
 
-  ldi durationl, low(35000)
-  ldi durationh, high(35000)
+  clr durationl
+  lds durationh, duration_address
+
+  ;DBREGF "Duration address 2:", FDEC, durationh
 
   tst period ; Testing if 0 --> pause
   brne PC+2
@@ -108,6 +121,7 @@ sound_restore_registers:
 
 .equ notes_tbl_index_min = 0
 .equ notes_tbl_index_max = 7
+
 .cseg
 notes_tbl_do: .db do, re, mi, fa, so, la, si, do2
 notes_tbl_so: .db so, la, si, do2, re2, mi2, fad2, so2
