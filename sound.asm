@@ -1,9 +1,10 @@
 ; Piezoelectric library for sound
 ; in  period (r8)         period in 10 us unit
-; TODO remove scratch register using the stack
-; TODO durationl:durationh should be read from the EEPROM
-; TODO recalibrate frequencies
 ; TODO finish writing scales and subroutine to point to the right scale
+; TODO durationl:durationh should be read from the EEPROM
+; TODO Replace duration asynchrone with a timer in order to let the microprosser do other things
+; TODO remove scratch register using the stack
+; TODO recalibrate frequencies
 
 .def  period = r8
 .def _period = r9 ; Scratch register (values are preserved via the stack)

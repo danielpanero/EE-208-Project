@@ -1,7 +1,7 @@
 ; Recording library for sound.asm
-; TODO preserve recording (option to erase it)
-; TODO use nibble (4bit instead of 8bit) since note index < 7
 ; TODO save / load the recording from / into EEPROM
+; TODO implement progress reading / writing buffer
+; TODO use nibble (4bit instead of 8bit) since note index < 7
 
 .equ record_buffer_length = 13
 .dseg
@@ -36,4 +36,7 @@ record_pop:
 record_clear:
     CB_init record_buffer
     ret
+
+record_rewind:
+    STI	record_buffer+_out, 0
     ret
