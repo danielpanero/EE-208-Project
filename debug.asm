@@ -8,9 +8,14 @@
 ; Write a message into the console
 ; - @0 message
 .macro DBMSG
+    in _sreg, SREG
+    push _sreg
+
     PRINTF	UART0_putc
     .db	CR, @0, 0
 
+    pop _sreg
+    out SREG, _sreg
 .endmacro
 
 ; Write a message and SREG into the console
@@ -38,11 +43,17 @@
     push a1
     push a0
 
+    in _sreg, SREG
+    push _sreg
+
     mov a0, @1
     clr a1
 
     PRINTF	UART0_putc
     .db	CR, @0, FBIN, a, 0
+
+    pop _sreg
+    out SREG, _sreg
 
     pop a0
     pop a1
@@ -55,11 +66,17 @@
     push a1
     push a0
 
+    in _sreg, SREG
+    push _sreg
+
     mov a0, @2
     clr a1
 
     PRINTF	UART0_putc
     .db	CR, @0, @1, a, 0
+
+    pop _sreg
+    out SREG, _sreg
 
     pop a0
     pop a1
@@ -73,11 +90,17 @@
     push a1
     push a0
 
+    in _sreg, SREG
+    push _sreg
+
     mov a1, @1
     mov a0, @2
 
     PRINTF	UART0_putc
     .db	CR, @0, FBIN, a, 0
+
+    pop _sreg
+    out SREG, _sreg
 
     pop a0
     pop a1
@@ -92,11 +115,17 @@
     push a1
     push a0
 
+    in _sreg, SREG
+    push _sreg
+
     mov a1, @2
     mov a0, @3
 
     PRINTF	UART0_putc
     .db	CR, @0, @1, a, 0
+
+    pop _sreg
+    out SREG, _sreg
 
     pop a0
     pop a1
@@ -109,11 +138,17 @@
     push a1
     push a0
 
+    in _sreg, SREG
+    push _sreg
+
     in a0, @1
     clr a1
 
     PRINTF	UART0_putc
     .db	CR, @0, FBIN, a, 0
+
+    pop _sreg
+    out SREG, _sreg
 
     pop a0
     pop a1
