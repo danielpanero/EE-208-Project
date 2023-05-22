@@ -3,7 +3,7 @@
 ; TODO implement progress reading / writing buffer
 ; TODO use nibble (4bit instead of 8bit) since note index < 7
 
-.equ record_buffer_length = 13
+.equ record_buffer_length = 3
 .dseg
 record_buffer:
     .byte 1
