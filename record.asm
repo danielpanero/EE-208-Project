@@ -14,6 +14,7 @@ record_buffer:
 .cseg
 record_init:
     CB_init record_buffer
+    ret
 
 record_push:
     push a0
@@ -29,6 +30,10 @@ record_pop:
 
     CB_POP record_buffer, record_buffer_length, a0
     mov note_index, a0
-
     pop a0 
+    ret
+
+record_clear:
+    CB_init record_buffer
+    ret
     ret
