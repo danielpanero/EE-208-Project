@@ -1,6 +1,6 @@
 ; Debugging library using the UART interface
 ; TODO UART with buffer to speed up to the print without stopping the main loop
-; TODO masking subrountine (return after executing)
+; TODO stubbing subrountine (return after executing)
 
 .define DEBUG 1
 
