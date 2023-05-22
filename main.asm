@@ -14,11 +14,13 @@
 .include "printf.asm"
 .include "buffer.asm"
 .include "uart.asm"
+.include "i2cx.asm"
 .include "debug.asm"
 
 ; Global variables
 .def note_index = r21
 
+.include "eeprom.asm"
 .include "sound.asm"
 .include "record.asm"
 .include "analog.asm"
@@ -45,13 +47,13 @@ reset:
     sei ; Activate interrupts
 
     ; Library initializations: 
-    rcall LCD_init ; Init lcd.asm library
-    rcall UART0_init ; Init uart.asm
-    rcall sound_init ; Init sound.asm library
-    rcall record_init ; Init record.asm library
-    rcall analog_init ; Init analog.asm library
+    rcall LCD_init
+    rcall UART0_init 
+    rcall eeprom_init
+    rcall sound_init
+    rcall record_init
+    rcall analog_init
 
-    OUTI DDRB, 1 ; LED
     OUTI DDRD, 0 ; Buttons
 
     ldi status_flag, 0b00000101
@@ -68,8 +70,6 @@ main:
     INVB status_flag, 3
     
     ;DBREG "Status flag 0:", status_flag
-
-    ;WAIT_MS 500 ; Rebound buttons
 
     push _status_flag ; Preserving scratch register content
 
