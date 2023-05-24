@@ -75,7 +75,7 @@ reset:
     rcall eeprom_init
 
 
-    ; TODO check why it doesn't exactly as LDI
+    ; FIXME check why it doesn't exactly as LDI
     EEPROM_WRITE duration_address, 0x01 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
     rcall sound_init
     rcall record_init
@@ -168,7 +168,7 @@ play_free:
 
 
 ; Plays the sound and records it
-; TODO implement screen notes or how much spaces in the buffer is left
+; IDEA implement screen notes or how much spaces in the buffer is left
 play_and_record:
     ;DBMSG "Playing and recording"
     PRINTF LCD_putc
@@ -259,8 +259,8 @@ rewind_record_and_play:
 ; It saves note length in the EEPROM
 ; TODO interface for input the duration
 save_note_length:
-    ldi r12, 0xF5
-    EEPROM_WRITE_REG duration_address, r12
+    ;ldi r12, 0xF5
+    ;EEPROM_WRITE_REG duration_address, r12
     ret
 
 ; Plays a note selected using scale selection and the index of note (preloaded)

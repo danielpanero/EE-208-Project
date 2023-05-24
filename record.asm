@@ -1,7 +1,8 @@
 ; Recording library for sound.asm
 ; TODO save / load the recording from / into EEPROM
-; TODO implement progress reading / writing buffer
-; TODO use nibble (4bit instead of 8bit) since note index < 7
+; IDEA implement progress reading / writing buffer
+; IDEA use nibble (4bit instead of 8bit) since note index < 7
+; IDEA multiple recordings
 
 .equ record_buffer_length = 3
 .dseg

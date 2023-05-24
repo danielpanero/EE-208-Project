@@ -13,6 +13,7 @@ eeprom_init:
     ret	
 
 
+; TODO change order of parameters to standard reg, address and not address, reg
 .macro EEPROM_READ
     CA i2c_start,EEPROM
     CA i2c_write, high(@0)

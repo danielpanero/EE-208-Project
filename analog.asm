@@ -1,4 +1,5 @@
 ; Analog deconding library for SHARP GPS2Y0A21
+; TODO analogl, analogh as scratch registers
 
 .def analogl = r18
 .def analogh = r19
