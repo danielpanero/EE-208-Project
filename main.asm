@@ -76,7 +76,7 @@ reset:
 
 
     ; FIXME check why it doesn't exactly as LDI
-    EEPROM_WRITE duration_address, 0x01 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
+    ;EEPROM_WRITE duration_address, 0x01 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
     rcall sound_init
     rcall record_init
     rcall analog_init
@@ -89,11 +89,7 @@ reset:
 
 ; TODO Replace bit constant with correct equ
 ; TODO Status flag management
-main:   
-
-    rcall play_free
-    rjmp main
-
+main:
     ; This part will make sense when using the interrupt as the buttons don't have one, having a status flag is more or less useless
     JP1 PIND, 0, PC+3
     INVB status_flag, 0
@@ -262,6 +258,20 @@ save_note_length:
     ;ldi r12, 0xF5
     ;EEPROM_WRITE_REG duration_address, r12
     ret
+
+; It loads the record from the EEPROM
+; TODO interface
+; TODO automatically do it when loading
+load_record:
+    rcall record_load_EEPROM
+    ret
+
+; It saves the record to the EEPROM
+; TODO interface
+save_record:
+    rcall record_save_EEPROM
+    ret
+
 
 ; Plays a note selected using scale selection and the index of note (preloaded)
 ; TODO implement scale selection
