@@ -18,10 +18,9 @@ sound_init:
   sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
 
   push durationh
-  ;DBMSG duration_address
-  EEPROM_READ duration_address, durationh
 
-  ;DBREGF "Duration address 1:", FDEC, durationh
+  EEPROM_READ duration_address, durationh
+  
   sts duration_address, durationh
 
   pop durationh
@@ -34,8 +33,6 @@ sound:
 
   clr durationl
   lds durationh, duration_address
-
-  ;DBREGF "Duration address 2:", FDEC, durationh
 
   tst period ; Testing if 0 --> pause
   brne PC+2

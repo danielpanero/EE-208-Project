@@ -17,7 +17,7 @@ eeprom_init:
 
 ; TODO change order of parameters to standard reg, address and not address, reg
 .macro EEPROM_READ
-    WAIT_US 1000
+    WAIT_US 2000
     CA i2c_start,EEPROM
     CA i2c_write, high(@0)
 	CA i2c_write, low(@0)
@@ -29,12 +29,12 @@ eeprom_init:
 
     rcall i2c_no_ack
 	rcall i2c_stop
-    WAIT_US 1000
+    WAIT_US 2000
 
 .endmacro 
 
 .macro EEPROM_WRITE
-    WAIT_US 1000
+    WAIT_US 2000
     CA i2c_start, EEPROM
     CA i2c_write, high(@0)
 	CA i2c_write, low(@0)
@@ -45,7 +45,7 @@ eeprom_init:
 .endmacro
 
 .macro EEPROM_WRITE_REG
-    WAIT_US 1000
+    WAIT_US 2000
     CA i2c_start,EEPROM
     CA i2c_write, high(@0)
 	CA i2c_write, low(@0)
@@ -53,5 +53,5 @@ eeprom_init:
     mov a0, @1
     rcall i2c_write
     rcall i2c_stop
-    WAIT_US 1000
+    WAIT_US 2000
 .endmacro
