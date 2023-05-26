@@ -1,8 +1,12 @@
 ; Analog deconding library for SHARP GPS2Y0A21
-; TODO <Change from analog_service_rountine into free running mode
+; TODO Change from analog_service_rountine into free running mode and remove need for analog_flag
+
+; Global variables:
+.def analog_flag = r20 ; FIXME remove it
+
+; Scratch registers (values are preserved via the stack):
 .def analogl = r18
 .def analogh = r19
-.def analog_flag = r20
 
 .equ ANLFINISHED = 0
 .equ ANLREQUESTED = 1
