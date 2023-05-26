@@ -5,7 +5,7 @@
 ; IDEA use nibble (4bit instead of 8bit) since note index < 7
 ; IDEA multiple recordings
 
-.equ record_buffer_length = 3
+.equ record_buffer_length = 252
 .dseg
 record_buffer:
     .byte 1
