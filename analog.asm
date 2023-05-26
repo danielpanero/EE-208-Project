@@ -1,5 +1,5 @@
 ; Analog deconding library for SHARP GPS2Y0A21
-
+; TODO <Change from analog_service_rountine into free running mode
 .def analogl = r18
 .def analogh = r19
 .def analog_flag = r20
