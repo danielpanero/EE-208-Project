@@ -1,5 +1,4 @@
 ; Analog deconding library for SHARP GPS2Y0A21
-; TODO analogl, analogh as scratch registers
 
 .def analogl = r18
 .def analogh = r19
@@ -29,17 +28,24 @@ analog_loop:
 
     RB0 analog_flag, ANLFINISHED ; Return if the analog requested is still pending
 
+    push analogl 
+    push analogh
+
     in	analogl, ADCL
 	in	analogh, ADCH
+
+    ldi analog_flag, (0<<ANLFINISHED) + (1<<ANLREQUESTED)
+    sbi	ADCSR,ADSC
 
     ;DBREGS "Analog conversion is being treated: ", analogh, analogl
     SUBI2 analogh, analogl, 1023 ; Subtract maximal value
     NEG2 analogh, analogl	
 
-    ldi analog_flag, (0<<ANLFINISHED) + (1<<ANLREQUESTED)
-    sbi	ADCSR,ADSC
-    ;DBIO "The ADCSR register: ", ADCSR
+    clr note_index
+    rcall analog_loop_normalize_note_index
 
+    pop analogh
+    pop analogl
     ret
 
 analog_start:
@@ -51,4 +57,25 @@ analog_start:
     ;DBIO "The ADCSR register: ", ADCSR
     ret
 
+; TODO better transition between notes / more stable transition (increasing the length of the note / adding 10% margin before switching)
+analog_loop_normalize_note_index:
+    inc note_index
+
+    ;DBREGSF "Analog: ", FDEC2, analogh, analogl
+    SUBI2 analogh, analogl, analog_max_value / (notes_tbl_index_max+2)  ; We choosed to place a note every 40 dec
+    ;DBSREG "SREG: "
+    JC0 analog_loop_normalize_note_index ; If analogh:analog_loop > 40, we can still make an higher note
+
+    dec note_index
+
+    cpi note_index, notes_tbl_index_min ; note_index must be >= 0
+    brsh PC+2 
+    ldi note_index, notes_tbl_index_min
+
+    cpi note_index, notes_tbl_index_max + 1 ; note_index must be <= 23
+    brlo PC+2
+    ldi note_index, notes_tbl_index_max
+
+    ;DBREGF "Final note found was: ", FDEC, note_index
+    ret
 

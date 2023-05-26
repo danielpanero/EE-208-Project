@@ -74,9 +74,7 @@ reset:
     rcall UART0_init 
     rcall eeprom_init
 
-
-    ; FIXME check why it doesn't exactly as LDI
-    ;EEPROM_WRITE duration_address, 0x01 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
+    EEPROM_WRITE duration_address, 250 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
     rcall sound_init
     rcall record_init
     rcall analog_init
@@ -90,6 +88,40 @@ reset:
 ; TODO Replace bit constant with correct equ
 ; TODO Status flag management
 main:
+    ldi note_index, 0
+    rcall record_push
+
+    ldi note_index, 1
+    rcall record_push
+
+    ldi note_index, 2
+    rcall record_push
+
+    ldi note_index, 3
+    rcall record_push
+
+    ldi note_index, 4
+    rcall record_push
+
+    ldi note_index, 5
+    rcall record_push
+
+    ldi note_index, 6
+    rcall record_push
+
+    ldi note_index, 7
+    rcall record_push
+
+    rcall record_save_EEPROM
+
+    DBMSG "Loading from EEPROM:"
+    WAIT_MS 500
+    rcall record_load_EEPROM
+
+loop:
+    rcall play_free
+    rjmp loop
+
     ; This part will make sense when using the interrupt as the buttons don't have one, having a status flag is more or less useless
     JP1 PIND, 0, PC+3
     INVB status_flag, 0
@@ -152,13 +184,11 @@ waiting:
 ; Plays the sound without recording
 play_free:
     ;DBMSG "Playing free"
-    PRINTF LCD_putc
-    .db CR, CR, "Playing free", "     ", CR, 0
+    ;PRINTF LCD_putc
+    ;.db CR, CR, "Playing free", "     ", CR, 0
 
     rcall analog_loop
-
-    clr note_index 
-    rcall loop_normalize_note_index
+    DBREGF "Note index", FDEC, note_index
     rcall play_note
     ret
 
@@ -172,9 +202,6 @@ play_and_record:
     WAIT_MS 1500
 
     rcall analog_loop
-
-    clr note_index 
-    rcall loop_normalize_note_index
     rcall play_note
 
     rcall record_push
@@ -190,14 +217,16 @@ play_and_record:
 ; TODO implement test for zero to check end
 play_from_record:
     ;DBMSG "Play from record"
-    PRINTF LCD_putc
-    .db CR, CR, "Play back", "      ", CR, 0
-    WAIT_MS 5000
+    ;PRINTF LCD_putc
+    ;.db CR, CR, "Play back", "      ", CR, 0
+    ;WAIT_MS 5000
 
     rcall record_pop
 
-    brtc PC+2
-    rcall stop_record; If the buffer arrives at the end
+    DBREGF "Note index", FDEC, note_index
+
+    ;brtc PC+2
+    ;rcall stop_record; If the buffer arrives at the end
 
     rcall play_note
     ret
@@ -274,8 +303,8 @@ save_record:
 
 
 ; Plays a note selected using scale selection and the index of note (preloaded)
+; TODO take to sound module
 ; TODO implement scale selection
-; TODO Implement screen text
 play_note:
     ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
     LDIZ 2*(notes_tbl_do)
@@ -286,27 +315,4 @@ play_note:
     mov period, r0
 
     rcall sound
-    ret
-
-
-; TODO better transition between notes / more stable transition (increasing the length of the note / adding 10% margin before switching)
-loop_normalize_note_index:
-    inc note_index
-
-    ;DBREGSF "Analog: ", FDEC2, analogh, analogl
-    SUBI2 analogh, analogl, analog_max_value / (notes_tbl_index_max+2)  ; We choosed to place a note every 40 dec
-    ;DBSREG "SREG: "
-    JC0 loop_normalize_note_index ; If analogh:analog_loop > 40, we can still make an higher note
-
-    dec note_index
-
-    cpi note_index, notes_tbl_index_min ; note_index must be >= 0
-    brsh PC+2 
-    ldi note_index, notes_tbl_index_min
-
-    cpi note_index, notes_tbl_index_max + 1 ; note_index must be <= 23
-    brlo PC+2
-    ldi note_index, notes_tbl_index_max
-
-    ;DBREGF "Final note found was: ", FDEC, note_index
     ret
