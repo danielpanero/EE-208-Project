@@ -17,18 +17,16 @@
 .include "i2cx.asm"
 .include "debug.asm"
 
-; Global variables
+; Global variables (+analog_flag=r20 --> to be removed)
 .def note_index = r21
+.def status_flag = r22
+.def _status_flag = r23 ; FIXME remove it using the stack
 
 .include "eeprom.asm"
 .include "sound.asm"
 .include "record.asm"
 .include "analog.asm"
 
-
-; Global status flag definitions
-.def status_flag = r22
-.def _status_flag = r23
 .equ MODE = 1
 .equ MODEMSK = 0b00000011
 
