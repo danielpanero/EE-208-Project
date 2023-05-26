@@ -1,6 +1,7 @@
 ; Recording library for sound.asm
 ; TODO rename a0, a1
 ; TODO clean up
+; FIXME fix buffer saving loading
 ; IDEA implement progress reading / writing buffer
 ; IDEA use nibble (4bit instead of 8bit) since note index < 7
 ; IDEA multiple recordings

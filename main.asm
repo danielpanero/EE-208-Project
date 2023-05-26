@@ -74,7 +74,7 @@ reset:
     rcall UART0_init 
     rcall eeprom_init
 
-    EEPROM_WRITE duration_address, 250 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
+    EEPROM_WRITE duration_address, 100 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
     rcall sound_init
     rcall record_init
     rcall analog_init
@@ -188,8 +188,8 @@ play_free:
     ;.db CR, CR, "Playing free", "     ", CR, 0
 
     rcall analog_loop
-    DBREGF "Note index", FDEC, note_index
-    rcall play_note
+    ;DBREGF "Note index", FDEC, note_index
+    rcall sound_play_note
     ret
 
 
@@ -202,7 +202,7 @@ play_and_record:
     WAIT_MS 1500
 
     rcall analog_loop
-    rcall play_note
+    rcall sound_play_note
 
     rcall record_push
 
@@ -228,7 +228,7 @@ play_from_record:
     ;brtc PC+2
     ;rcall stop_record; If the buffer arrives at the end
 
-    rcall play_note
+    rcall sound_play_note
     ret
 
 
@@ -299,20 +299,4 @@ load_record:
 ; TODO interface
 save_record:
     rcall record_save_EEPROM
-    ret
-
-
-; Plays a note selected using scale selection and the index of note (preloaded)
-; TODO take to sound module
-; TODO implement scale selection
-play_note:
-    ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
-    LDIZ 2*(notes_tbl_do)
-    ADDZ note_index
-
-    lpm
-
-    mov period, r0
-
-    rcall sound
     ret

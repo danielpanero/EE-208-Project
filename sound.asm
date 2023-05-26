@@ -15,69 +15,85 @@ duration_address: .byte 1
 
 .cseg
 sound_init:
-  sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
+    sbi	DDRE,SPEAKER ; Make pin SPEAKER an output
 
-  push durationh
+    push durationh
 
-  EEPROM_READ duration_address, durationh
-  
-  sts duration_address, durationh
+    EEPROM_READ duration_address, durationh
+    
+    sts duration_address, durationh
 
-  pop durationh
-  ret
+    pop durationh
+    ret
 
 sound:
-  push _period ; Saving values of the scratch register
-  push durationl
-  push durationh
+    push _period ; Saving values of the scratch register
+    push durationl
+    push durationh
 
-  clr durationl
-  lds durationh, duration_address
+    clr durationl
+    lds durationh, duration_address
 
-  tst period ; Testing if 0 --> pause
-  brne PC+2
-  rjmp sound_off
+    tst period ; Testing if 0 --> pause
+    brne PC+2
+    rjmp sound_off
 
 sound_on:
-  mov _period, period ; Copying into scratch register
+    mov _period, period ; Copying into scratch register
 
 sound_loop:
-  WAIT_US 9
-  ; 4 cycles = 1us
-  dec _period ; 1 cycles
-  tst _period ; 1 cycles
-  brne sound_loop ; 2 cycles
+    WAIT_US 9
+    ; 4 cycles = 1us
+    dec _period ; 1 cycles
+    tst _period ; 1 cycles
+    brne sound_loop ; 2 cycles
 
-  INVP  PORTE,SPEAKER
+    INVP  PORTE,SPEAKER
 
-  sub durationl, period
-  brsh PC+2 ; C = 0 (durationl > period)
-  subi durationh, 1 ; C = 1 (durationl < period)
-  brcc PC+2 ; C = 0 (period - duration > 0)
-  rjmp sound_restore_registers ; C=1 (period - duration < 0)
+    sub durationl, period
+    brsh PC+2 ; C = 0 (durationl > period)
+    subi durationh, 1 ; C = 1 (durationl < period)
+    brcc PC+2 ; C = 0 (period - duration > 0)
+    rjmp sound_restore_registers ; C=1 (period - duration < 0)
 
-  ;DBREGSF "Duration left", FDEC2, durationh, durationl
+    ;DBREGSF "Duration left", FDEC2, durationh, durationl
 
-  tst durationh 
-  brne PC+2 ; Z= 0 (period > 0)
-  rjmp sound_restore_registers; Z=1 (period - duration = 0)
+    tst durationh 
+    brne PC+2 ; Z= 0 (period > 0)
+    rjmp sound_restore_registers; Z=1 (period - duration = 0)
 
-  rjmp sound_on 
+    rjmp sound_on 
 
 sound_off:
-  WAIT_US 8
-  ; 8 cacles = 2 us
-  DEC2 durationh, durationl ; 3 cycles
-  TST2 durationh, durationl ; 3 cycles
-  brne sound_off ; 2 cycles
+    WAIT_US 8
+    ; 8 cacles = 2 us
+    DEC2 durationh, durationl ; 3 cycles
+    TST2 durationh, durationl ; 3 cycles
+    brne sound_off ; 2 cycles
 
-  rjmp sound_restore_registers
+    rjmp sound_restore_registers
 
 sound_restore_registers:
-  pop durationh
-  pop durationl
-  pop _period
-  ret
+    pop durationh
+    pop durationl
+    pop _period
+    ret
+
+
+; Plays a note selected using scale selection and the index of note (preloaded)
+; TODO implement scale selection
+sound_play_note:
+    ; Going through the notes_tbl: note_index = 0 --> lowest note, note_index = 23 --> highest note:
+    LDIZ 2*(notes_tbl_do)
+    ADDZ note_index
+
+    lpm
+
+    mov period, r0
+
+    rcall sound
+    ret
+
 
 .equ	do	= 100000/523
 .equ	dod	= 100000/554
