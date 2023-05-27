@@ -1,7 +1,6 @@
 ; Recording library for sound.asm
 ; TODO rename a0, a1
 ; TODO clean up
-; FIXME fix buffer saving loading
 ; IDEA implement progress reading / writing buffer
 ; IDEA use nibble (4bit instead of 8bit) since note index < 7
 ; IDEA multiple recordings
@@ -56,14 +55,14 @@ record_load_EEPROM:
 
     CA i2c_rep_start,EEPROM + R
 
-    ; Loading the first four special bits
+    ;Loading the first four special bits
     LDIX record_buffer
 
     rcall i2c_read
     rcall i2c_ack
     st X+, a0
 
-    ;DBREGF "Loading 1.0: ", FDEC, a0
+    ;DBREGF "Loading 1.0: ", FDEC, a2
 
     rcall i2c_read
     rcall i2c_ack
@@ -87,9 +86,11 @@ record_load_EEPROM:
 
     tst a1 ; Testing whether the saved buffer is empty
     brne PC+2
-    rjmp record_load_save_end
+    rjmp record_load_end
 
     rcall record_clear; Rewinding the record
+
+    push a1 ; Saveguarding the length
 
 record_load_loop:
 
@@ -105,10 +106,21 @@ record_load_loop:
     ;DBREGF "Loading note index: ", FDEC, a1
 
     brne PC+3 ; Testing whether it reached the end
-    rcall i2c_no_ack
-    rjmp record_load_save_end
+    pop a1 ; Restoring the length
+    rjmp record_load_end
 
     rjmp record_load_loop
+
+record_load_end:
+    rcall i2c_no_ack
+    rcall i2c_stop
+    WAIT_US 2000
+
+    sts record_buffer+_nbr, a1 ; Saving the length as before we had to set to zero in order to start from the beginning
+    STI	record_buffer+_out, 0 ; Rewinding the record
+    pop a1
+    pop a0 ; Restoring scratch registers
+    ret
 
 record_save_EEPROM:
     push a0 ; Saveguarding scratch registers : a0 element, a1 length of the buffer
@@ -116,12 +128,12 @@ record_save_EEPROM:
 
     STI	record_buffer+_out, 0 ; Rewinding the record
 
-    WAIT_MS 2
+    ; Saving the first four special bits
+
+    WAIT_US 2000
     CA i2c_start, EEPROM ; Starting the communication
     CA i2c_write, high(record_buffer)
 	CA i2c_write, low(record_buffer)
-
-    ; Saving the first four special bits
     LDIX record_buffer
 
     ld a0, X+
@@ -142,31 +154,32 @@ record_save_EEPROM:
     ;DBREGF "Saving 3bit: ", FDEC, a0
 
     ld a0, X+
-    rcall i2c_write
+    rcall i2c_write 
 
     ;DBREGF "Saving 4bit: ", FDEC, a0
 
     tst a1 ; Testing whether the buffer is empty
     brne PC+2
-    rjmp record_load_save_end
+    rjmp record_save_end
 
 record_save_loop:
     ; Saving the buffer
     CB_POP record_buffer, record_buffer_length, a0
 
+    ;DBSREG "SREG saving:"
     ;DBREGF "Saving note loop: ", FDEC, a0
 
     brtc PC+3
     rcall i2c_write
-    rjmp record_load_save_end ; If it reaches the end of the buffer it ends the communication
+    rjmp record_save_end ; If it reaches the end of the buffer it ends the communication
 
     rcall i2c_write
     rjmp record_save_loop
 
 
-record_load_save_end:
+record_save_end:
     rcall i2c_stop
-    WAIT_MS 2
+    WAIT_US 2000
 
     STI	record_buffer+_out, 0 ; Rewinding the record
     

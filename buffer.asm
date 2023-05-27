@@ -1,6 +1,6 @@
 ; file:	buffer.asm   target ATmega128L-4MHz-STK300
 ; purpose library, FIFO handling
-; Modified in order to retain the last index (modified line 61-62 and 75-77)
+; Modified in order to retain the last index (modified line 61-62 and 74- 78)
 
 ; === FIFO (First In First Out) ===
 ; CB (circular buffer)
@@ -75,6 +75,13 @@ _end:
 	brne PC+3
 	clr	w
 	set
+
+	lds _w, @0+_nbr
+	cp	w,_w			; if out=len then wrap around
+	brne PC+3
+	clr	w
+	set
+
 	sts	@0+_out,w		; store incremented out-pointer
 _end:	
 .endmacro
