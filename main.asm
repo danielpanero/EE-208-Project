@@ -10,6 +10,7 @@
 	jmp	analog_service_routine
 
 
+.include "math.asm"
 .include "lcd.asm"	
 .include "printf.asm"
 .include "buffer.asm"
@@ -72,8 +73,9 @@ reset:
     rcall UART0_init 
     rcall eeprom_init
 
+    EEPROM_WRITE threshold_address, 15 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
     EEPROM_WRITE duration_address, 100 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
-    EEPROM_WRITE scale_address, 1 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
+    EEPROM_WRITE scale_address, 0 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
 
     rcall sound_init
     rcall record_init
