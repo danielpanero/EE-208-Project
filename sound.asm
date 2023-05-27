@@ -1,5 +1,6 @@
 ; Piezoelectric library for sound
 ; TODO recalibrate frequencies
+; TODO PUSH, POP using macros
 
 ; Scratch registers (values are preserved via the stack):
 .def period = r22 
