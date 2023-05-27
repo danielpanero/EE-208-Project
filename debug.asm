@@ -2,6 +2,7 @@
 ; @Copyright Daniel Panero (342800)
 ; TODO UART with buffer to speed up to the print without stopping the main loop
 ; TODO stubbing subrountine (return after executing)
+; TODO print Z, print X, print Y
 
 .define DEBUG 1
 
