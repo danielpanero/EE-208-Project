@@ -72,7 +72,9 @@ reset:
     rcall UART0_init 
     rcall eeprom_init
 
-    EEPROM_WRITE duration_address, 100 ; Preloading the EEPROM (to be removed using the settings)!!!!! 
+    EEPROM_WRITE duration_address, 100 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
+    EEPROM_WRITE scale_address, 1 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
+
     rcall sound_init
     rcall record_init
     rcall analog_init
