@@ -28,13 +28,15 @@ cin_init:
     ret
 
 cin_remote_service_routine:
+    cli
     in _sreg, SREG
-    PUSHX
-    PUSH4 b0, b1, b2, b3, _sreg
+
+    POP5 b0, b1, b2, b3, _sreg
+    POPX
+
     CLR4 b0, b1, b2, b3
 
     ldi b2, 14
-    cli
 
 cin_remote_service_routine_loop:
 	P2C			PINE,IR			; move Pin to Carry (P2C)
@@ -73,7 +75,7 @@ cin_remote_service_push_back:
     
 cin_remote_service_routine_end:
     POPX
-    POP4 b0, b1, b2, b3, _sreg
+    POP5 b0, b1, b2, b3, _sreg
     out SREG, _sreg
     reti
 
