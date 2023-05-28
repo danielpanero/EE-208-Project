@@ -49,6 +49,10 @@ cin_remote_service_routine_loop:
 	WAIT_US		(REMOTE_PERIOD-4)			; wait bit period (- compensation)	
 	DJNZ		b2, cin_remote_service_routine_loop		; Decrement and Jump if Not Zero
 
+    cpi b0, 0xff ; Checking if failed
+    brne PC+2
+    rjmp cin_remote_service_routine_end
+
     ;DBREGF "Command b1:", FHEX, b1
     ;DBREGF "Command:", FHEX, b0
 
@@ -83,7 +87,7 @@ cin_remote_service_push_back:
 cin_remote_service_routine_end:
     ;DBMSG "End service routine"
 
-    WAIT_US REMOTE_PERIOD
+    WAIT_MS REMOTE_PERIOD / 8
 
     POPZ
     POPY
