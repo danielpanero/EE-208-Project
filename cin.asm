@@ -81,7 +81,7 @@ cin_remote_service_routine_end:
     ;DBMSG "End service routine"
 
     WAIT_US REMOTE_PERIOD
-    
+
     POPZ
     POPY
     POPX
@@ -142,25 +142,39 @@ cin_cyclic_end_%:
 
 ; in @0 register, @1 address for updating the screen while waiting
 .macro CIN_NUM
-    PUSH3 command, a0, b0, c0
+    cli
+    PUSH5 command, a0, b0, c0, c1
 cin_num_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    brts @3 ; Branch if empty (T=1)
+    brtc PC+2
+    rjmp cin_num_ret_% ; Branch if empty (T=1)
 
-cin_num_enter_%
+cin_num_enter_%:
     cpi command, ENTER
-    breq cin_num_end_%
+    brne PC+2
+    rjmp cin_num_end_%
 
 cin_num_%:
     ; Check if it is a number
     cpi command, MAX_NUMBER_RANGE + 1
-    brsh cin_num_end_%
+
+    brlo PC+2
+    rjmp cin_num_loop_%
+
+    ;DBREGF "Command num loop: ", FDEC, command
 
     ; Multiply the number before by ten
+    CLR2 c0, c1
+
     mov a0, @0
     ldi b0, 10
     
     rcall mul11
+
+    tst c1
+    breq PC+3
+    mov @0, command
+    rjmp cin_num_loop_%
 
     ; Add the event number
     mov @0, c0
@@ -172,9 +186,14 @@ cin_num_%:
 
     rjmp cin_num_loop_%
 
+cin_num_ret_%:
+    POP5 command, a0, b0, c0, c1
+    sei
+    rjmp @1
 
 cin_num_end_%:
-    POP3 command, a0, b0, c0
+    POP5 command, a0, b0, c0, c1
+    sei
 .endmacro
 
 ; in @0 address for updating the screen while waiting
