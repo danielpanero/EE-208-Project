@@ -1,7 +1,6 @@
 ; Piezoelectric library for sound
 ; TODO recalibrate frequencies
 ; TODO finish scales
-; TODO PUSH, POP using macros
 
 ; Scratch registers (values are preserved via the stack):
 .def period = r22 
@@ -159,5 +158,5 @@ notes_tbl: .db do, re, mi, fa, so, la, si, do2, ; Do Major
  .db re, mi, fad, so, la, si, dod2, re2, ; Re Major
  .db la, si, dod2, re2, mi2, fad2, sod2, la2, ; La Major
  .db si, dod, red, mi, fad, sod, lad, si2 ; Si Major
- .db mi, fad, sod, la, si, dod2, red2, mi ;Mi Major
+ .db mi, fad, sod, la, si, dod2, red2, mi2 ;Mi Major
  
