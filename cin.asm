@@ -8,8 +8,8 @@
 
 .equ ENTER = 0x38
 
-.equ YES = 0x0B
-.equ NO = 0x0C
+.equ YES = 0x10
+.equ NO = 0x11
 
 .equ MAX_NUMBER_RANGE = 0x09
 
@@ -179,23 +179,39 @@ cin_num_end_%:
 
 ; in @0 address for updating the screen while waiting
 .macro CIN_YES_NO
+    cli
     push command
+    clr command
 cin_yes_no_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    brts @0 ; Branch if empty (T=1)
+    ;DBREGF "Command yes no loop: ", FHEX, command
+
+    brtc PC+2
+    rjmp cin_yes_no_ret_% ; Branch if empty (T=1)
 
 cin_yes_%:   
     cpi command, YES
-    brne cin_no_%
+    breq PC+2
+    rjmp cin_no_%
+
     set
-    rjmp cin_yes_no_end_
+    rjmp cin_yes_no_end_%
 cin_no_%:   
     cpi command, NO
-    brne cin_yes_no_loop_%
+    breq PC+2
+    rjmp cin_yes_no_loop_%
+
     clt
-    rjmp cin_yes_no_end_
+    rjmp cin_yes_no_end_%
+
+cin_yes_no_ret_%:
+    pop command
+    sei
+    rjmp @0
+
 cin_yes_no_end_%:
     pop command
+    sei
 .endmacro
 
 ; in @0 key to wait, @1 address for updating the screen while waiting
