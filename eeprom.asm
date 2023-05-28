@@ -40,7 +40,7 @@ eeprom_init:
 	CA i2c_write, low(@0)
 
     CA i2c_write, @1
-    rcall i2c_stop
+    call i2c_stop
     WAIT_US 1000
 .endmacro
 

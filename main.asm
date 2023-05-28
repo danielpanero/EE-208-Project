@@ -76,7 +76,7 @@ main_loop_play_text:
     brne main_loop_replay_text
     PRINTF LCD_putc
     .db CR, CR, "<==== Play ====>", CR, 0
-
+    
     rjmp main_loop_end
 
 main_loop_replay_text:
