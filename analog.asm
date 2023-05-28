@@ -20,6 +20,7 @@ threshold_address: .byte 1
 
 .cseg
 
+; FIXME add saving sreg 
 analog_service_routine:
 	ldi	analog_flag, (1<<ANLFINISHED) + (1<<ANLREQUESTED) ; Set the flag	
 	reti 
