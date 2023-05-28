@@ -179,15 +179,27 @@ cin_yes_no_end_%:
 
 ; in @0 key to wait, @1 address for updating the screen while waiting
 .macro CIN_WAIT_KEY
+    cli
     push command
+    clr command
 cin_wait_key_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    brts @1 ; Branch if empty (T=1)
+    brtc PC+2
+    rjmp cin_wait_key_return_% ; Branch if empty (T=1)
+
+    ;DBREGF "Command cyclic: ", FHEX, command
 
 cin_key_%:   
     cpi command, @0
     brne cin_wait_key_loop_%
+    rjmp cin_wait_key_end_%
+
+cin_wait_key_return_%:
+    pop command
+    sei
+    rjmp @1
 
 cin_wait_key_end_%:
     pop command
+    sei
 .endmacro
