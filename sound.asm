@@ -148,7 +148,7 @@ sound_restore_registers:
 
 
 .equ scales_tbl_index_min = 0
-.equ scales_tbl_index_max = 3
+.equ scales_tbl_index_max = 5
 
 .equ notes_tbl_index_min = 0
 .equ notes_tbl_index_max = 7
@@ -158,3 +158,6 @@ notes_tbl: .db do, re, mi, fa, so, la, si, do2, ; Do Major
  .db so, la, si, do2, re2, mi2, fad2, so2, ; Sol Major
  .db re, mi, fad, so, la, si, dod2, re2, ; Re Major
  .db la, si, dod2, re2, mi2, fad2, sod2, la2, ; La Major
+ .db si, dod, red, mi, fad, sod, lad, si2 ; Si Major
+ .db mi, fad, sod, la, si, dod2, red2, mi ;Mi Major
+ 
