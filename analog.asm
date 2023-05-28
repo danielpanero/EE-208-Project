@@ -1,6 +1,6 @@
 ; Analog deconding library for SHARP GPS2Y0A21
-; TODO Change from analog_service_rountine into free running mode and remove need for analog_flag
 ; TODO Clean up and organize it
+; IDEA Change from analog_service_rountine into free running mode and remove need for analog_flag
 
 ; Global variables:
 .def analog_flag = r20 ; FIXME remove it
