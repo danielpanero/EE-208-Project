@@ -30,7 +30,7 @@ record_push:
 record_pop:
     push a0
 
-    CB_POP record_buffer, record_buffer_length, a0
+    CB_POP_PRESERVE record_buffer, record_buffer_length, a0
     mov note_index, a0
     pop a0 
     ret

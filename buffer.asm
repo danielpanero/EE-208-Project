@@ -1,6 +1,8 @@
 ; file:	buffer.asm   target ATmega128L-4MHz-STK300
 ; purpose library, FIFO handling
 
+; Modified: added macro CB_POP_PRESERVE to preserve the length and make the buffer trasversable multiple times
+
 ; === FIFO (First In First Out) ===
 ; CB (circular buffer)
 
@@ -76,4 +78,42 @@ _end:
 	sts	@0+_out,w		; store incremented out-pointer
 _end:	
 .endmacro
+
+
+.macro	CB_POP_PRESERVE ;buf,len,elem
+; out:	a0	byte to pop
+;	T	1=buffer empty
+
+	lds	w,@0+_nbr		; load nbr
+	tst	w
+	set
+	breq	_end		; if nbr=0 then T=1 (buffer empty)
+
+	clt					; else T=0
+	;dec	w				; decrement nbr
+	;sts	@0+_nbr,w		; store nbr
 	
+	push	xl			; push x on stack
+	push	xh
+	lds	w,@0+_out		; load out-pointer
+	mov	xl,w
+	subi	xl, low(-@0-_beg)
+	sbci	xh,high(-@0-_beg) ; add out-pointer to buffer base
+	ld	@2,x			; take element from circular buffer
+	pop	xh				; pop x from stack
+	pop	xl			
+	inc	w				; increment out-pointer
+	cpi	w,@1			; if out=len then wrap around
+	brne PC+3
+	clr	w
+	set
+
+	lds _w, @0+_nbr
+	cp	w,_w			; if out=len then wrap around
+	brne PC+3
+	clr	w
+	set
+
+	sts	@0+_out,w		; store incremented out-pointer
+_end:	
+.endmacro
