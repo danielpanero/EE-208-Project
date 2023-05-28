@@ -126,7 +126,7 @@
 	mov	e0,w
 	ldi	w,high(@0)
 	mov	e1,w
-	rcall	_printf
+	call	_printf
 	.endmacro
 
 ; mod	y,z
