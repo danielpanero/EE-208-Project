@@ -1,5 +1,5 @@
 
-.def command = r18
+.def command = r20
 
 .equ REMOTE_PERIOD = 1778		
 
@@ -95,28 +95,49 @@ cin_remote_service_routine_end:
 
 ; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
 .macro CIN_CYCLIC
+    ;DBMSG "Start:"
+    cli
     push command
+
+    clr command
 cin_cyclic_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    brts @3 ; Branch if empty (T=1)
+    ;DBSREG "SREG cyclic: "
+    brtc PC+2
+    rjmp cin_cyclic_return_%  ; Branch if empty (T=1)
 
-cin_cyclic_enter_%
+    ;DBREGF "Command cyclic: ", FHEX, command
+cin_cyclic_enter_%:
     cpi command, ENTER
-    breq cin_cyclic_end_%
+    brne PC+2
+    rjmp cin_cyclic_end_%
 
 cin_cyclic_arrow_up_%:   
     cpi command, ARROW_UP
-    brne cin_cyclic_arrow_down_%
+    breq PC+2
+    rjmp cin_cyclic_arrow_down_%
+    
     INC_CYC @0, @1, @2
+    ;DBREGF "Up:", FDEC, @0
 cin_cyclic_arrow_down_%:   
     cpi command, ARROW_DOWN
-    brne cin_cyclic_loop_%
-    DEC_CYC @0, @1, @2
-
+    breq PC+2
     rjmp cin_cyclic_loop_%
 
-cin_cyclic_end_%:
+    DEC_CYC @0, @1, @2
+    ;DBREGF "Down:", FDEC, @0
+    rjmp cin_cyclic_loop_%
+cin_cyclic_return_%:
+    ;DBMSG "Redrawing: "
     pop command
+    sei
+    rjmp @3
+
+cin_cyclic_end_%:
+    ;DBMSG "Ending: "
+    pop command
+    sei
+
 .endmacro
 
 ; in @0 register, @1 address for updating the screen while waiting
