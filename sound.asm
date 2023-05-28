@@ -26,7 +26,7 @@ sound_init:
     EEPROM_READ scale_address, scale_index
     sts scale_address, scale_index
 
-    ;DBREGF "Scale index": , FDEC, scale_index
+    DBREGF "Durationh": , FDEC, durationh
 
     pop scale_index
     pop durationh

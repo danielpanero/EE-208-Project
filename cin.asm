@@ -7,6 +7,9 @@
 .equ ARROW_DOWN = 0x21
 
 .equ ENTER = 0x38
+.equ HOME = 0x22
+.equ STOP = 0x00
+.equ MUTE = 0x0d
 
 .equ YES = 0x10
 .equ NO = 0x11
@@ -49,7 +52,7 @@ cin_remote_service_routine_loop:
     ;DBREGF "Command b1:", FHEX, b1
     ;DBREGF "Command:", FHEX, b0
 
-    ; Checking if length of is zero
+    ; Checking if length of buffer is zero
 	lds	b3, events_buffer+_nbr
 
     ;DBREGF "Length:", FDEC, b3 
@@ -169,7 +172,7 @@ cin_num_%:
     mov a0, @0
     ldi b0, 10
     
-    rcall mul11
+    call mul11
 
     tst c1
     breq PC+3
@@ -189,7 +192,7 @@ cin_num_%:
 cin_num_ret_%:
     POP5 command, a0, b0, c0, c1
     sei
-    rjmp @1
+    jmp @1
 
 cin_num_end_%:
     POP5 command, a0, b0, c0, c1
@@ -256,6 +259,82 @@ cin_wait_key_return_%:
     rjmp @1
 
 cin_wait_key_end_%:
+    pop command
+    sei
+.endmacro
+
+; in @0 key 1, @1 address 1, @2 key 2, @3 address 2
+.macro CIN_WAIT_KEY2
+    cli
+    push command
+    clr command
+cin_wait_key2_loop_%:
+    CB_POP events_buffer, events_buffer_length, command
+    brtc PC+2
+    rjmp cin_wait_key2_return_% ; Branch if empty (T=1)
+
+    DBREGF "Command cyclic: ", FHEX, command
+
+cin_key_21_%:   
+    cpi command, @0
+    brne cin_key_22_%
+
+    pop command
+    sei
+    rjmp @1
+
+cin_key_22_%:   
+    cpi command, @2
+    brne cin_wait_key2_loop_%
+    
+    pop command
+    sei
+    rjmp @3
+
+cin_wait_key2_return_%:
+    pop command
+    sei
+.endmacro
+
+
+; in @0 key 1, @1 address 1, @2 key 2, @3 address 2, @4 key 3, @5 address 3
+.macro CIN_WAIT_KEY3
+    cli
+    push command
+    clr command
+cin_wait_key3_loop_%:
+    CB_POP events_buffer, events_buffer_length, command
+    brtc PC+2
+    rjmp cin_wait_key3_return_% ; Branch if empty (T=1)
+
+    DBREGF "Command cyclic: ", FHEX, command
+
+cin_key_31_%:   
+    cpi command, @0
+    brne cin_key_32_%
+
+    pop command
+    sei
+    rjmp @1
+
+cin_key_32_%:   
+    cpi command, @2
+    brne cin_key_33_%
+    
+    pop command
+    sei
+    rjmp @3
+
+
+cin_key_33_%:   
+    cpi command, @4
+    brne cin_wait_key3_loop_%
+    
+    pop command
+    sei
+    rjmp @5
+
+cin_wait_key3_return_%:
     pop command
     sei
 .endmacro

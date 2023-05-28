@@ -43,6 +43,8 @@ analog_loop:
     ;DBMSG "Analog conversion was requested"
     ;DBREG "Analog flag before: ", analog_flag
     ;DBIO "The ADCSR register: ", ADCSR
+    sei
+    
     CB0 analog_flag, ANLREQUESTED, analog_start ; If it wasn't already requested, it fires a new conversion
 
     RB0 analog_flag, ANLFINISHED ; Return if the analog requested is still pending
@@ -70,7 +72,6 @@ analog_start:
     ;DBMSG "Analog conversion wasn't already started nor pending"
     ldi analog_flag, (0<<ANLFINISHED) + (1<<ANLREQUESTED)
     ;DBREG "Analog was set to: ", analog_flag
-
     sbi	ADCSR,ADSC
     ;DBIO "The ADCSR register: ", ADCSR
     ret
