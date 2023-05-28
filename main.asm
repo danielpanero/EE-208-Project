@@ -274,7 +274,7 @@ settings_loop_end:
 settings_loop_jmp_tbl:
     cpi var, SETTINGS_MENU_SCALES
     brne PC+2
-    rjmp settings
+    rjmp settings_scales
 
     cpi var, SETTINGS_MENU_DURATION
     brne PC+2
@@ -287,16 +287,37 @@ settings_loop_jmp_tbl:
     rjmp settings
 
 ; ========================================================================================
+; Settings > Scales
+
+settings_scales:
+    EEPROM_READ scale_address, b0
+
+    call LCD_clear
+settings_scales_loop:
+    PRINTF LCD_putc
+    .db CR, CR, "Scale =", FDEC|FDIG1, b, "/5", CR, 0
+
+    CIN_CYCLIC b0, scales_tbl_index_min, scales_tbl_index_max, settings_scales_loop
+
+    EEPROM_WRITE_REG scale_address, b0
+    sts scale_address, b0
+
+    rjmp main
+
+; ========================================================================================
 ; Settings > Duration
 
 settings_duration:
     EEPROM_READ duration_address, d0
 
-    rcall LCD_clear
+    call LCD_clear
 settings_duration_loop:
     PRINTF LCD_putc
-    .db CR, CR, "Duration =", FDEC, d, " /25 ms", 0
+    .db CR, CR, "Duration =", FDEC|FDIG3, d, "/25 ms", 0
 
     CIN_NUM d0, settings_duration_loop
+
     EEPROM_WRITE_REG duration_address, d0
-    rjmp main_loop
+    sts duration_address, d0
+
+    rjmp main
