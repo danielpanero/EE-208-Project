@@ -1,12 +1,12 @@
 
-.def event = r18
+.def command = r18
 
 .equ REMOTE_PERIOD = 1778		
 
-.equ ARROW_UP = 0x00
-.equ ARROW_DOWN = 0x01
+.equ ARROW_UP = 0x20
+.equ ARROW_DOWN = 0x21
 
-.equ ENTER = 0x0A
+.equ ENTER = 0x38
 
 .equ YES = 0x0B
 .equ NO = 0x0C
@@ -83,44 +83,44 @@ cin_remote_service_routine_end:
 
 ; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
 .macro CIN_CYCLIC
-    push event
+    push command
 cin_cyclic_loop_%:
-    CB_POP events_buffer, events_buffer_length, event
+    CB_POP events_buffer, events_buffer_length, command
     brts @3 ; Branch if empty (T=1)
 
 cin_cyclic_enter_%
-    cpi event, ENTER
+    cpi command, ENTER
     breq cin_cyclic_end_%
 
 cin_cyclic_arrow_up_%:   
-    cpi event, ARROW_UP
+    cpi command, ARROW_UP
     brne cin_cyclic_arrow_down_%
     INC_CYC @0, @1, @2
 cin_cyclic_arrow_down_%:   
-    cpi event, ARROW_DOWN
+    cpi command, ARROW_DOWN
     brne cin_cyclic_loop_%
     DEC_CYC @0, @1, @2
 
     rjmp cin_cyclic_loop_%
 
 cin_cyclic_end_%:
-    pop event
+    pop command
 .endmacro
 
 ; in @0 register, @1 address for updating the screen while waiting
 .macro CIN_NUM
-    PUSH3 event, a0, b0, c0
+    PUSH3 command, a0, b0, c0
 cin_num_loop_%:
-    CB_POP events_buffer, events_buffer_length, event
+    CB_POP events_buffer, events_buffer_length, command
     brts @3 ; Branch if empty (T=1)
 
 cin_num_enter_%
-    cpi event, ENTER
+    cpi command, ENTER
     breq cin_num_end_%
 
 cin_num_%:
     ; Check if it is a number
-    cpi event, MAX_NUMBER_RANGE + 1
+    cpi command, MAX_NUMBER_RANGE + 1
     brsh cin_num_end_%
 
     ; Multiply the number before by ten
@@ -131,51 +131,51 @@ cin_num_%:
 
     ; Add the event number
     mov @0, c0
-    add @0, event
+    add @0, command
 
     ; Checking for overflow
     brcc PC+2
-    mov @0, event
+    mov @0, command
 
     rjmp cin_num_loop_%
 
 
 cin_num_end_%:
-    POP3 event, a0, b0, c0
+    POP3 command, a0, b0, c0
 .endmacro
 
 ; in @0 address for updating the screen while waiting
 .macro CIN_YES_NO
-    push event
+    push command
 cin_yes_no_loop_%:
-    CB_POP events_buffer, events_buffer_length, event
+    CB_POP events_buffer, events_buffer_length, command
     brts @0 ; Branch if empty (T=1)
 
 cin_yes_%:   
-    cpi event, YES
+    cpi command, YES
     brne cin_no_%
     set
     rjmp cin_yes_no_end_
 cin_no_%:   
-    cpi event, NO
+    cpi command, NO
     brne cin_yes_no_loop_%
     clt
     rjmp cin_yes_no_end_
 cin_yes_no_end_%:
-    pop event
+    pop command
 .endmacro
 
 ; in @0 key to wait, @1 address for updating the screen while waiting
 .macro CIN_WAIT_KEY
-    push event
+    push command
 cin_wait_key_loop_%:
-    CB_POP events_buffer, events_buffer_length, event
+    CB_POP events_buffer, events_buffer_length, command
     brts @1 ; Branch if empty (T=1)
 
 cin_key_%:   
-    cpi event, @0
+    cpi command, @0
     brne cin_wait_key_loop_%
 
 cin_wait_key_end_%:
-    pop event
+    pop command
 .endmacro
