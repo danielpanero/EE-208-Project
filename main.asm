@@ -21,7 +21,7 @@
 .include "i2cx.asm"
 .include "debug.asm"
 
-; Global variables (+analog_flag=r20 --> to be removed)
+; Global variables (+analog_flag=r20)
 .def note_index = r21
 
 ; Scratch variables
@@ -54,6 +54,8 @@ reset:
 .equ PLAYING = 0
 .equ REPLAYING = 1
 .equ SETTINGS_MENU = 2
+
+; FIXME implement loading / saving from EEProm music buffer
 
 .equ SETTINGS_MENU_SCALES = 0
 .equ SETTINGS_MENU_DURATION = 1
