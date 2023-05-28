@@ -311,7 +311,7 @@ cin_wait_key3_loop_%:
     brtc PC+2
     rjmp cin_wait_key3_return_% ; Branch if empty (T=1)
 
-    DBREGF "Command cyclic: ", FHEX, command
+    ;DBREGF "Command cyclic: ", FHEX, command
 
 cin_key_31_%:   
     cpi command, @0
