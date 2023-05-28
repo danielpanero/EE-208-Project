@@ -1,6 +1,8 @@
 
 .def event = r18
 
+.equ REMOTE_PERIOD = 1778		
+
 .equ ARROW_UP = 0x00
 .equ ARROW_DOWN = 0x01
 
@@ -10,6 +12,74 @@
 .equ NO = 0x0C
 
 .equ MAX_NUMBER_RANGE = 0x09
+
+.equ events_buffer_length = 12
+.dseg
+events_buffer:
+    .byte 1
+    .byte 1
+    .byte 1
+    .byte events_buffer_length
+
+.cseg
+cin_init:
+    CB_init events_buffer
+    OUTI EIMSK, 0b10000000
+    ret
+
+cin_remote_service_routine:
+    in _sreg, SREG
+    PUSHX
+    PUSH4 b0, b1, b2, b3, _sreg
+    CLR4 b0, b1, b2, b3
+
+    ldi b2, 14
+    cli
+
+cin_remote_service_routine_loop:
+	P2C			PINE,IR			; move Pin to Carry (P2C)
+	ROL2		b1,b0			; roll carry into 2-byte reg
+	WAIT_US		(REMOTE_PERIOD-4)			; wait bit period (- compensation)	
+	DJNZ		b2, cin_remote_service_routine_loop		; Decrement and Jump if Not Zero
+
+    ; Checking if length of is zero
+	lds	b3, events_buffer+_nbr
+
+    ;DBREGF "Command :", FHEX, b0
+    ;DBREGF "Length:", FDEC, b3 
+
+    tst b3
+    brne PC+2
+    rjmp cin_remote_service_push_back
+	
+
+    ; Taking out the last element of the buffer
+    clr xh
+	lds	xl, events_buffer+_in
+
+    subi xl, low(-events_buffer-_beg + 1)
+	sbci xh,high(-events_buffer-_beg + 1) ; add in-pointer to buffer base
+
+    ld b3, x
+
+    ;DBREGF "Last command :", FHEX, b3
+    cp b0, b3
+
+    breq cin_remote_service_routine_end
+
+cin_remote_service_push_back:
+    ;DBREGF "Pushed back: ", FDEC, b0
+    CB_push events_buffer, events_buffer_length, b0
+    
+cin_remote_service_routine_end:
+    POPX
+    POP4 b0, b1, b2, b3, _sreg
+    out SREG, _sreg
+    reti
+
+.macro CIN_FLUSH
+    CB_init events_buffer
+.endmacro
 
 ; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
 .macro CIN_CYCLIC
