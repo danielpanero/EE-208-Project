@@ -42,10 +42,6 @@ reset:
     rcall UART0_init 
     rcall eeprom_init
 
-    ;EEPROM_WRITE threshold_address, 15 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
-    ;EEPROM_WRITE duration_address, 100 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
-    ;EEPROM_WRITE scale_address, 0 ; FIXME Preloading the EEPROM (to be removed using the settings)!!!!! 
-
     rcall sound_init
     rcall record_init
     rcall analog_init
@@ -62,6 +58,7 @@ reset:
 .equ SETTINGS_MENU_SCALES = 0
 .equ SETTINGS_MENU_DURATION = 1
 .equ SETTINGS_MENU_THRESHOLD = 2
+.equ SETTINGS_MENU_RESET = 3
 
 ; ========================================================================================
 ; Main menu
@@ -69,19 +66,22 @@ main:
     clr var
     rcall lcd_clear
 main_loop:
+    rcall LCD_home
+    PRINTF LCD_putc
+    .db CR, CR,  "Select mode :   ",  0
+    rcall LCD_lf
+    
 main_loop_play_text:
     cpi var, PLAYING
     brne main_loop_replay_text
-
     PRINTF LCD_putc
-    .db CR, CR, "<==== Play ====>" , CR, 0
+    .db CR, CR, "<==== Play ====>", CR, 0
 
     rjmp main_loop_end
 
 main_loop_replay_text:
     cpi var, REPLAYING
     brne main_loop_settings_text
-
     PRINTF LCD_putc
     .db CR,CR, "<=== Replay ===>", CR, 0
 
@@ -89,7 +89,6 @@ main_loop_replay_text:
 
 main_loop_settings_text:
     cpi var, SETTINGS_MENU
-
     PRINTF LCD_putc
     .db CR,CR, "<== Settings ==>", CR, 0
 
@@ -190,8 +189,6 @@ play_and_record_stop_jmp_tbl:
 ; ========================================================================================
 ; Menu > Playback
 
-; TODO checking if buffer is empty before playing back
-; TODO 
 play_from_record:
     rcall LCD_clear
     rcall record_rewind
@@ -240,7 +237,7 @@ play_from_record_stop_jmp_tbl:
 
 
 ; ========================================================================================
-; Settings menu
+; Menu > Settings menu
 settings:
     clr var
     rcall LCD_clear
@@ -263,13 +260,21 @@ settings_loop_duration_text:
 
 settings_loop_threshold_text:
     cpi var, SETTINGS_MENU_THRESHOLD
+    brne settings_loop_reset_text
 
     PRINTF LCD_putc
     .db CR,CR, "<= Threshold  =>", CR, 0
     rjmp settings_loop_end
 
+settings_loop_reset_text:
+    cpi var, SETTINGS_MENU_RESET
+
+    PRINTF LCD_putc
+    .db CR,CR, "<=== Reset ===>", CR, 0
+    rjmp settings_loop_end
+
 settings_loop_end:
-    CIN_CYCLIC var, SETTINGS_MENU_SCALES, SETTINGS_MENU_THRESHOLD, settings_loop
+    CIN_CYCLIC var, SETTINGS_MENU_SCALES, SETTINGS_MENU_RESET, settings_loop
 
 settings_loop_jmp_tbl:
     cpi var, SETTINGS_MENU_SCALES
@@ -282,12 +287,16 @@ settings_loop_jmp_tbl:
 
     cpi var, SETTINGS_MENU_THRESHOLD
     brne PC+2
-    rjmp settings
+    rjmp settings_threshold
+
+    cpi var, SETTINGS_MENU_RESET
+    brne PC+2
+    rjmp settings_reset
 
     rjmp settings
 
 ; ========================================================================================
-; Settings > Scales
+; Menu > Settings > Scales
 
 settings_scales:
     EEPROM_READ scale_address, b0
@@ -305,7 +314,7 @@ settings_scales_loop:
     rjmp main
 
 ; ========================================================================================
-; Settings > Duration
+; Menu > Settings > Duration
 
 settings_duration:
     EEPROM_READ duration_address, d0
@@ -321,3 +330,51 @@ settings_duration_loop:
     sts duration_address, d0
 
     rjmp main
+
+; ========================================================================================
+; Menu > Settings > Threshold
+; FIXME better input
+settings_threshold:
+    EEPROM_READ threshold_address, b0
+
+    call LCD_clear
+settings_threshold_loop:
+    PRINTF LCD_putc
+    .db CR, CR, "Threshold =", FDEC|FDIG3, b, "/  ", CR, 0
+
+    CIN_CYCLIC b0, 0, (analog_max_value + 1) / (notes_tbl_index_max+2), settings_threshold_loop
+
+    EEPROM_WRITE_REG threshold_address, b0
+    sts threshold_address, b0
+
+    rjmp main
+
+; ========================================================================================
+; Menu > Settings > Reset
+settings_reset:
+    call LCD_clear
+    PRINTF LCD_putc
+    .db CR, CR, "Reset? [Y/N]", 0
+settings_reset_loop:
+    CIN_YES_NO settings_reset_loop
+
+settings_reset_jmp_tbl:
+    brts PC + 2
+    rjmp main
+
+    EEPROM_WRITE scale_address, 0
+    EEPROM_WRITE duration_address, 100
+    EEPROM_WRITE threshold_address, 15
+
+    call record_clear
+    call record_save_EEPROM
+
+
+    call  LCD_clear
+    PRINTF LCD_putc
+    .db CR, CR, "Resetted!", 0
+    WAIT_MS 1000
+    
+    rjmp main
+
+    
