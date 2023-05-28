@@ -1,3 +1,5 @@
+; TODO Before all loop, add lcd_clear
+
 .include "m128def.inc"
 .include "definitions.asm"
 .include "macros.asm"
@@ -202,6 +204,8 @@ play_from_record:
     PRINTF LCD_putc
     .db CR, CR, "Nothing to play!", 0
     WAIT_MS 1000
+
+    ; FIXME ask if recording
     rjmp main
     
 play_from_record_not_empty:
@@ -234,7 +238,7 @@ play_from_record_stop_loop:
 
 play_from_record_stop_jmp_tbl:
     brtc PC + 2
-    rjmp play_from_record_loop
+    rjmp play_from_record_not_empty
     rjmp main
 
 
