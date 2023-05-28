@@ -13,7 +13,6 @@ record_buffer:
     .byte 1
     .byte record_buffer_length
 
-; FIXME once default settings initialized when record_init automatically call record_load_EEPROM
 .cseg
 record_init:
     CB_init record_buffer

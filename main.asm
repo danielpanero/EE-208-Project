@@ -55,7 +55,7 @@ reset:
 .equ REPLAYING = 1
 .equ SETTINGS_MENU = 2
 
-; FIXME implement loading / saving from EEProm music buffer
+; FIXME implement loading / saving from EEProm music buffe
 
 .equ SETTINGS_MENU_SCALES = 0
 .equ SETTINGS_MENU_DURATION = 1

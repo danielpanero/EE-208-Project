@@ -3,7 +3,7 @@
 ; IDEA Change from analog_service_rountine into free running mode and remove need for analog_flag
 
 ; Global variables:
-.def analog_flag = r20 ; FIXME remove it
+.def analog_flag = r20
 
 ; Scratch registers (values are preserved via the stack):
 .def analog_threshold = r17

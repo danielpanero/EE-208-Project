@@ -1,3 +1,5 @@
+; TODO clean up and better names
+; TODO add library description
 
 .def command = r20
 
