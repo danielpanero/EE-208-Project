@@ -31,8 +31,10 @@ cin_remote_service_routine:
     cli
     in _sreg, SREG
 
-    POP5 b0, b1, b2, b3, _sreg
-    POPX
+    PUSH5 b0, b1, b2, b3, _sreg
+    PUSHX
+    PUSHY
+    PUSHZ
 
     CLR4 b0, b1, b2, b3
 
@@ -44,10 +46,12 @@ cin_remote_service_routine_loop:
 	WAIT_US		(REMOTE_PERIOD-4)			; wait bit period (- compensation)	
 	DJNZ		b2, cin_remote_service_routine_loop		; Decrement and Jump if Not Zero
 
+    ;DBREGF "Command b1:", FHEX, b1
+    ;DBREGF "Command:", FHEX, b0
+
     ; Checking if length of is zero
 	lds	b3, events_buffer+_nbr
 
-    ;DBREGF "Command :", FHEX, b0
     ;DBREGF "Length:", FDEC, b3 
 
     tst b3
@@ -70,14 +74,20 @@ cin_remote_service_routine_loop:
     breq cin_remote_service_routine_end
 
 cin_remote_service_push_back:
-    ;DBREGF "Pushed back: ", FDEC, b0
     CB_push events_buffer, events_buffer_length, b0
+    ;DBREGF "Pushed back: ", FHEX, b0
     
 cin_remote_service_routine_end:
+    ;DBMSG "End service routine"
+
+    WAIT_US REMOTE_PERIOD
+    
+    POPZ
+    POPY
     POPX
     POP5 b0, b1, b2, b3, _sreg
     out SREG, _sreg
-    reti
+    ret
 
 .macro CIN_FLUSH
     CB_init events_buffer
