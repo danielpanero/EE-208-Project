@@ -1,9 +1,6 @@
+; file:	record.asm   target ATmega128L-4MHz-STK300
 ; Recording library for sound.asm
-; TODO rename a0, a1
-; TODO clean up
-; IDEA implement progress reading / writing buffer
-; IDEA use nibble (4bit instead of 8bit) since note index < 7
-; IDEA multiple recordings
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
 
 .equ record_buffer_length = 240
 .dseg
@@ -65,13 +62,9 @@ record_load_EEPROM:
     ldi a0, 0
     st X+, a0
 
-    ;DBREGF "Loading 1.0: ", FDEC, a2
-
     rcall i2c_read
     rcall i2c_ack
     st X+, a0
-
-    ;DBREGF "Loading 2.0: ", FDEC, a0
 
     rcall i2c_read
     rcall i2c_ack
@@ -79,13 +72,9 @@ record_load_EEPROM:
 
     mov a1, a0
 
-    ;DBREGF "Loading 3.0: ", FDEC, a0
-
     rcall i2c_read
     rcall i2c_ack
     st X+, a0
-
-    ;DBREGF "Loading 4.0: ", FDEC, a0
 
     tst a1 ; Testing whether the saved buffer is empty
     brne PC+2
@@ -101,12 +90,7 @@ record_load_loop:
     rcall i2c_ack
     CB_push record_buffer, record_buffer_length, a0
 
-    ;DBSREG "SREG :"
-
-    ;DBREGF "Loading note loop: ", FDEC, a0
-
     dec a1
-    ;DBREGF "Loading note index: ", FDEC, a1
 
     brne PC+3 ; Testing whether it reached the end
     pop a1 ; Restoring the length
@@ -142,24 +126,16 @@ record_save_EEPROM:
     ld a0, X+
     rcall i2c_write
 
-    ;DBREGF "Saving 1bit: ", FDEC, a0
-
     ld a0, X+
     rcall i2c_write
-
-    ;DBREGF "Saving 2bit: ", FDEC, a0
 
     ld a0, X+
     rcall i2c_write
 
     mov a1, a0
 
-    ;DBREGF "Saving 3bit: ", FDEC, a0
-
     ld a0, X+
     rcall i2c_write 
-
-    ;DBREGF "Saving 4bit: ", FDEC, a0
 
     tst a1 ; Testing whether the buffer is empty
     brne PC+2
@@ -168,9 +144,6 @@ record_save_EEPROM:
 record_save_loop:
     ; Saving the buffer
     CB_POP_PRESERVE record_buffer, record_buffer_length, a0
-
-    ;DBSREG "SREG saving:"
-    ;DBREGF "Saving note loop: ", FDEC, a0
 
     brtc PC+3
     rcall i2c_write

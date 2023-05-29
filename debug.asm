@@ -1,8 +1,6 @@
+; file:	debug.asm   target ATmega128L-4MHz-STK300
 ; Debugging library using the UART interface
-; @Copyright Daniel Panero (342800)
-; IDEA UART with buffer to speed up to the print without stopping the main loop
-; IDEA stubbing subrountine (return after executing)
-; IDEA print Z, print X, print Y
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
 
 .define DEBUG 1
 

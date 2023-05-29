@@ -1,5 +1,7 @@
-; TODO clean up and better names
-; TODO add library description
+; file:	cin.asm   target ATmega128L-4MHz-STK300
+; Cin library used to treat the event sent by the remote
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
+
 .def command = r20
 
 .equ REMOTE_PERIOD = 1778		
@@ -54,13 +56,8 @@ cin_remote_service_routine_loop:
     brne PC+2
     rjmp cin_remote_service_routine_end
 
-    ;DBREGF "Command b1:", FHEX, b1
-    ;DBREGF "Command:", FHEX, b0
-
     ; Checking if length of buffer is zero
 	lds	b3, events_buffer+_nbr
-
-    ;DBREGF "Length:", FDEC, b3 
 
     tst b3
     brne PC+2
@@ -76,17 +73,14 @@ cin_remote_service_routine_loop:
 
     ld b3, x
 
-    ;DBREGF "Last command :", FHEX, b3
     cp b0, b3
 
     breq cin_remote_service_routine_end
 
 cin_remote_service_push_back:
     CB_push events_buffer, events_buffer_length, b0
-    ;DBREGF "Pushed back: ", FHEX, b0
     
 cin_remote_service_routine_end:
-    ;DBMSG "End service routine"
 
     WAIT_MS REMOTE_PERIOD / 8
 
@@ -103,18 +97,15 @@ cin_remote_service_routine_end:
 
 ; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting, @4 interrupt key, @5 interrupt address
 .macro CIN_CYCLIC
-    ;DBMSG "Start:"
     cli
     push command
 
     clr command
 cin_cyclic_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    ;DBSREG "SREG cyclic: "
     brtc PC+2
     rjmp cin_cyclic_return_%  ; Branch if empty (T=1)
 
-    ;DBREGF "Command cyclic: ", FHEX, command
 cin_cyclic_enter_%:
     cpi command, ENTER
     brne PC+2
@@ -131,29 +122,24 @@ cin_cyclic_arrow_up_%:
     rjmp cin_cyclic_arrow_down_%
     
     INC_CYC @0, @1, @2
-    ;DBREGF "Up:", FDEC, @0
 cin_cyclic_arrow_down_%:   
     cpi command, ARROW_DOWN
     breq PC+2
     rjmp cin_cyclic_loop_%
 
     DEC_CYC @0, @1, @2
-    ;DBREGF "Down:", FDEC, @0
     rjmp cin_cyclic_loop_%
 cin_cyclic_return_%:
-    ;DBMSG "Redrawing: "
     pop command
     sei
     rjmp @3
 
 cin_cyclic_end_%:
-    ;DBMSG "Ending: "
     pop command
     sei
 
 .endmacro
 
-; FIXME stabelize it
 ; in @0 register, @1 address for updating the screen while waiting
 .macro CIN_NUM
     cli
@@ -208,7 +194,6 @@ cin_num_end_%:
     sei
 .endmacro
 
-; FIXME stabelize it
 ; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
 .macro CIN_NUM_CYC
     cli
@@ -275,7 +260,6 @@ cin_num_cyc_end_%:
     clr command
 cin_yes_no_loop_%:
     CB_POP events_buffer, events_buffer_length, command
-    ;DBREGF "Command yes no loop: ", FHEX, command
 
     brtc PC+2
     rjmp cin_yes_no_ret_% ; Branch if empty (T=1)
@@ -320,8 +304,6 @@ cin_wait_key_loop_%:
     brtc PC+2
     rjmp cin_wait_key_return_% ; Branch if empty (T=1)
 
-    ;DBREGF "Command cyclic: ", FHEX, command
-
 cin_key_%:   
     cpi command, @0
     brne cin_wait_key_loop_%
@@ -346,8 +328,6 @@ cin_wait_key2_loop_%:
     CB_POP events_buffer, events_buffer_length, command
     brtc PC+2
     rjmp cin_wait_key2_return_% ; Branch if empty (T=1)
-
-    ;DBREGF "Command cyclic: ", FHEX, command
 
 cin_key_21_%:   
     cpi command, @0
@@ -380,8 +360,6 @@ cin_wait_key3_loop_%:
     CB_POP events_buffer, events_buffer_length, command
     brtc PC+2
     rjmp cin_wait_key3_return_% ; Branch if empty (T=1)
-
-    ;DBREGF "Command cyclic: ", FHEX, command
 
 cin_key_31_%:   
     cpi command, @0

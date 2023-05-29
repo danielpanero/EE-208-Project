@@ -1,6 +1,6 @@
+; file:	analog.asm   target ATmega128L-4MHz-STK300
 ; Analog deconding library for SHARP GPS2Y0A21
-; TODO Clean up and organize it
-; IDEA Change from analog_service_rountine into free running mode and remove need for analog_flag
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
 
 ; Global variables:
 .def analog_flag = r20
@@ -19,8 +19,6 @@
 threshold_address: .byte 1
 
 .cseg
-
-; FIXME add saving sreg 
 analog_service_routine:
 	ldi	analog_flag, (1<<ANLFINISHED) + (1<<ANLREQUESTED) ; Set the flag	
 	reti 
@@ -40,9 +38,6 @@ analog_init:
 
     ret
 analog_loop:
-    ;DBMSG "Analog conversion was requested"
-    ;DBREG "Analog flag before: ", analog_flag
-    ;DBIO "The ADCSR register: ", ADCSR
     sei
     
     CB0 analog_flag, ANLREQUESTED, analog_start ; If it wasn't already requested, it fires a new conversion
@@ -58,7 +53,6 @@ analog_loop:
     ldi analog_flag, (0<<ANLFINISHED) + (1<<ANLREQUESTED)
     sbi	ADCSR,ADSC
 
-    ;DBREGS "Analog conversion is being treated: ", analogh, analogl
     SUBI2 analogh, analogl, 1023 ; Subtract maximal value
     NEG2 analogh, analogl	
 
@@ -69,11 +63,8 @@ analog_loop:
     ret
 
 analog_start:
-    ;DBMSG "Analog conversion wasn't already started nor pending"
     ldi analog_flag, (0<<ANLFINISHED) + (1<<ANLREQUESTED)
-    ;DBREG "Analog was set to: ", analog_flag
     sbi	ADCSR,ADSC
-    ;DBIO "The ADCSR register: ", ADCSR
     ret
 
 ; a1:a0 = analogh:analogl, b0 = (analog_max_value + 1) / (notes_tbl_index_max+2), c1:c0 = a1:a0 / b0 (integer division), d0 = a1:a0 % b0 (rest), d1 = c0 - note_index
@@ -106,13 +97,8 @@ analog_normalize_note_index:
     breq PC + 2 ; If c0 - note_index = 1, we have to check if the rest is bigger than 25% of (analog_max_value + 1) / (notes_tbl_index_max+2)
     rjmp analog_finalize_note_index
 
-    ;DBMSG "Checking"
-
     lds analog_threshold, threshold_address
     cp d0, analog_threshold
-
-    ;DBREGF "Rest :", FDEC, d0
-    ;DBSREG "SREG"
     
     brsh PC+2 ; If the d0 < 25% of (analog_max_value + 1) / (notes_tbl_index_max+2), we don't change the note
     rjmp analog_restore_registers

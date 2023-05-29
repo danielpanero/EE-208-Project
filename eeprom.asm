@@ -1,9 +1,11 @@
+; file:	eeprom.asm   target ATmega128L-4MHz-STK300
 ; I2C library for EEPROM
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
+
 .equ	EEPROM	= 0b10100000	; device address
 .equ	R	= 1					; read flag
 
 
-; TODO at first start check whether some flag is initialized and if not initialize default settings
 eeprom_init:
     OUTI DDRB,0xff
     OUTI PORTB,0xff
@@ -14,8 +16,6 @@ eeprom_init:
 	rcall i2c_init
     ret	
 
-
-; TODO change order of parameters to standard reg, address and not address, reg
 .macro EEPROM_READ
     WAIT_US 2000
     CA i2c_start,EEPROM

@@ -1,3 +1,7 @@
+; file:	main.asm   target ATmega128L-4MHz-STK300
+; Main program
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
+
 .include "m128def.inc"
 .include "definitions.asm"
 .include "macros.asm"
@@ -220,7 +224,6 @@ play_and_record_ask_playback_jmp_tbl:
 
 ; ========================================================================================
 ; Menu > Playback
-; FIXME fix after recording (it works after reset)
 play_from_record:
     rcall LCD_clear
     rcall record_rewind

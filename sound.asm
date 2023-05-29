@@ -1,6 +1,6 @@
+; file:	sound.asm   target ATmega128L-4MHz-STK300
 ; Piezoelectric library for sound
-; TODO recalibrate frequencies
-; TODO finish scales
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
 
 ; Scratch registers (values are preserved via the stack):
 .def period = r22 
@@ -24,8 +24,6 @@ sound_init:
 
     EEPROM_READ scale_address, scale_index
     sts scale_address, scale_index
-
-    ;DBREGF "Durationh": , FDEC, durationh
 
     pop scale_index
     pop durationh
@@ -54,9 +52,6 @@ sound_note_load: ; Going through the notes_tbl: note_index = 0 --> lowest note, 
     lpm
     mov period, r0
 
-    ;DBREGF "Note index: ", FDEC, note_index
-    ;DBREGF "Period: ", FDEC, period
-
 sound:
     clr durationl
     lds durationh, duration_address
@@ -83,8 +78,6 @@ sound_loop:
     subi durationh, 1 ; C = 1 (durationl < period)
     brcc PC+2 ; C = 0 (period - duration > 0)
     rjmp sound_restore_registers ; C=1 (period - duration < 0)
-
-    ;DBREGSF "Duration left", FDEC2, durationh, durationl
 
     tst durationh 
     brne PC+2 ; Z= 0 (period > 0)

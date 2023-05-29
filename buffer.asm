@@ -2,6 +2,7 @@
 ; purpose library, FIFO handling
 
 ; Modified: added macro CB_POP_PRESERVE to preserve the length and make the buffer trasversable multiple times
+; Copyright 2023: Daniel Panero (342800), Yasmina Jemili (310507)
 
 ; === FIFO (First In First Out) ===
 ; CB (circular buffer)
