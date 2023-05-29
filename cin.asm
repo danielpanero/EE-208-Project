@@ -171,8 +171,6 @@ cin_num_%:
     brlo PC+2
     rjmp cin_num_loop_%
 
-    ;DBREGF "Command num loop: ", FDEC, command
-
     ; Multiply the number before by ten
     CLR2 c0, c1
 
@@ -181,7 +179,7 @@ cin_num_%:
     
     call mul11
 
-    tst c1
+    _cpi c1, 0x00
     breq PC+3
     mov @0, command
     rjmp cin_num_loop_%

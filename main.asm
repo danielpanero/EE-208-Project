@@ -406,8 +406,13 @@ settings_duration:
 
     call LCD_clear
 settings_duration_loop:
+    call LCD_home
     PRINTF LCD_putc
-    .db CR, CR, "Duration =", FDEC|FDIG3, d, "/25 ms", 0
+    .db CR, CR, "Duration :", LF, 0
+
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, FDEC|FDIG3, d, " x 25 ms", 0
 
     CIN_NUM d0, settings_duration_loop
 
@@ -465,6 +470,6 @@ settings_reset_jmp_tbl:
     .db CR, CR, "Resetted!", 0
     WAIT_MS 1000
     
-    rjmp main
+    jmp main
 
     
