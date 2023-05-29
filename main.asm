@@ -1,5 +1,3 @@
-; TODO Before all loop, add lcd_clear
-
 .include "m128def.inc"
 .include "definitions.asm"
 .include "macros.asm"
@@ -67,7 +65,7 @@ reset:
 ; Main menu
 main:
     clr var
-    rcall lcd_clear
+    rcall LCD_clear
 main_loop:
     rcall LCD_home
     PRINTF LCD_putc
@@ -118,6 +116,7 @@ main_loop_jmp_tbl:
 ; ========================================================================================
 ; Main > Play menu
 play:
+    call LCD_clear
     PRINTF LCD_putc
     .db CR, CR, "Recording? [Y/N]", 0
 play_loop:
@@ -178,7 +177,10 @@ play_and_record_loop:
 play_and_record_stop:
     rcall LCD_clear
     PRINTF LCD_putc
-    .db CR, CR, "Save the recording? [Y/N]", 0
+    .db CR, CR, "Save recording?", LF, 0
+    rcall LCD_lf
+    PRINTF LCD_putc
+    .db CR, "           [Y/N]", 0
 
 play_and_record_stop_loop:
     CIN_YES_NO play_and_record_stop_loop
@@ -235,6 +237,7 @@ play_and_record_empty_jmp_tbl:
     rjmp main
     
 play_from_record_not_empty:
+    call LCD_clear
     PRINTF LCD_putc
     .db CR, CR, "Playing back", 0
 
@@ -257,7 +260,10 @@ play_from_record_loop:
 play_from_record_stop:
     rcall LCD_clear
     PRINTF LCD_putc
-    .db CR, CR, "One more time? [Y/N]", 0
+    .db CR, CR, "One more time? ", LF, 0
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, "           [Y/N]", 0
 
 play_from_record_stop_loop:
     CIN_YES_NO play_from_record_stop_loop
@@ -274,12 +280,16 @@ settings:
     clr var
     rcall LCD_clear
 settings_loop:
+    rcall LCD_home
+    PRINTF LCD_putc
+    .db CR, CR,  "Select :   ", LF, 0
+    rcall LCD_lf
 settings_loop_scales_text:
     cpi var, SETTINGS_MENU_SCALES
     brne settings_loop_duration_text
 
     PRINTF LCD_putc
-    .db CR,CR, "<=== Scale ===>", CR, 0
+    .db CR, CR, "<===  Scale ===> ", LF, 0
     rjmp settings_loop_end
 
 settings_loop_duration_text:
@@ -287,7 +297,7 @@ settings_loop_duration_text:
     brne settings_loop_threshold_text
 
     PRINTF LCD_putc
-    .db CR,CR, "<== Duration ==>", CR, 0
+    .db CR, CR, "<== Duration ==>", LF, 0
     rjmp settings_loop_end
 
 settings_loop_threshold_text:
@@ -295,14 +305,14 @@ settings_loop_threshold_text:
     brne settings_loop_reset_text
 
     PRINTF LCD_putc
-    .db CR,CR, "<= Threshold  =>", CR, 0
+    .db CR, CR, "<=  Threshold =>", LF, 0
     rjmp settings_loop_end
 
 settings_loop_reset_text:
     cpi var, SETTINGS_MENU_RESET
 
     PRINTF LCD_putc
-    .db CR,CR, "<=== Reset ===>", CR, 0
+    .db CR, CR, "<===  Reset ===>", LF,  0
     rjmp settings_loop_end
 
 settings_loop_end:
@@ -428,6 +438,7 @@ settings_threshold_loop:
 ; Menu > Settings > Reset
 settings_reset:
     call LCD_clear
+    call LCD_home
     PRINTF LCD_putc
     .db CR, CR, "Reset? [Y/N]", 0
 settings_reset_loop:
