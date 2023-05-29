@@ -164,7 +164,7 @@ record_save_EEPROM:
 
 record_save_loop:
     ; Saving the buffer
-    CB_POP record_buffer, record_buffer_length, a0
+    CB_POP_PRESERVE record_buffer, record_buffer_length, a0
 
     ;DBSREG "SREG saving:"
     ;DBREGF "Saving note loop: ", FDEC, a0
