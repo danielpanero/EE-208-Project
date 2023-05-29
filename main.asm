@@ -452,6 +452,10 @@ settings_reset_jmp_tbl:
     EEPROM_WRITE duration_address, 100
     EEPROM_WRITE threshold_address, 15
 
+    STI scale_address, 0
+    STI duration_address, 100
+    STI threshold_address, 15
+
     call record_clear
     call record_save_EEPROM
 
