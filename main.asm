@@ -128,6 +128,7 @@ play_loop_jmp_tbl:
     rjmp play_and_record
     
 
+
 ; ========================================================================================
 ; Main > Play > Play free
 play_free:
@@ -186,8 +187,9 @@ play_and_record_stop_loop:
     CIN_YES_NO play_and_record_stop_loop, HOME, main
 
 play_and_record_stop_jmp_tbl:
-    brts PC + 2
-    rjmp play_and_record
+    brts PC + 3
+    rcall record_clear
+    rjmp play
 
     rcall record_save_EEPROM
     
@@ -234,6 +236,7 @@ play_and_record_empty_loop:
 play_and_record_empty_jmp_tbl:
     brtc PC + 2
     rjmp play_and_record
+    
     rjmp main
     
 play_from_record_not_empty:
@@ -463,7 +466,6 @@ settings_reset_jmp_tbl:
     STI threshold_address, 15
 
     call record_clear
-    call record_save_EEPROM
 
 
     call  LCD_clear

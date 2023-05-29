@@ -38,6 +38,7 @@ record_pop:
 
 record_clear:
     CB_init record_buffer
+    rcall record_save_EEPROM
     ret
 
 record_rewind:
@@ -60,6 +61,8 @@ record_load_EEPROM:
 
     rcall i2c_read
     rcall i2c_ack
+    
+    ldi a0, 0
     st X+, a0
 
     ;DBREGF "Loading 1.0: ", FDEC, a2
@@ -88,7 +91,7 @@ record_load_EEPROM:
     brne PC+2
     rjmp record_load_end
 
-    rcall record_clear; Rewinding the record
+    rcall record_rewind; Rewinding the record
 
     push a1 ; Saveguarding the length
 
