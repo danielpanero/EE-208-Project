@@ -266,7 +266,7 @@ settings_loop_scales_text:
     brne settings_loop_duration_text
 
     PRINTF LCD_putc
-    .db CR,CR, "<===  Scale  ===>", CR, 0
+    .db CR,CR, "<=== Scale ===>", CR, 0
     rjmp settings_loop_end
 
 settings_loop_duration_text:
@@ -322,11 +322,54 @@ settings_scales:
 
     call LCD_clear
 settings_scales_loop:
+    call LCD_home
     PRINTF LCD_putc
-    .db CR, CR, "Scale =", FDEC|FDIG1, b, "/5", CR, 0
+    .db CR, CR, "Set scale : ", 0
 
+setting_scales_DoM_text:
+    cpi b0, DO_M
+    brne setting_scales_ReM_text
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "Do Major ", 0
+    rjmp setting_scales_loop_end
+setting_scales_ReM_text:
+    cpi b0, RE_M
+    brne setting_scales_MiM_text
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "Re Major ", 0
+    rjmp setting_scales_loop_end
+setting_scales_MiM_text:
+    cpi b0, MI_M
+    brne setting_scales_SoM_text
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "Mi Major ", 0
+    rjmp setting_scales_loop_end
+setting_scales_SoM_text:
+    cpi b0, SO_M
+    brne setting_scales_LaM_text
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "Sol Major", 0
+    rjmp setting_scales_loop_end
+setting_scales_LaM_text:
+    cpi b0, LA_M
+    brne setting_scales_SiM_text
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "La Major ", 0
+    rjmp setting_scales_loop_end
+setting_scales_SiM_text:
+    cpi b0, SI_M
+    call LCD_lf
+    PRINTF LCD_putc
+    .db CR, CR, "Si Major ", 0
+    rjmp setting_scales_loop_end
+
+setting_scales_loop_end:
     CIN_CYCLIC b0, scales_tbl_index_min, scales_tbl_index_max, settings_scales_loop
-
     EEPROM_WRITE_REG scale_address, b0
     sts scale_address, b0
 

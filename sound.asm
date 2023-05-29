@@ -152,6 +152,13 @@ sound_restore_registers:
 .equ notes_tbl_index_min = 0
 .equ notes_tbl_index_max = 7
 
+.equ DO_M = 0
+.equ RE_M = 1
+.equ MI_M = 2
+.equ SO_M = 3
+.equ LA_M = 4
+.equ SI_M = 5
+
 .cseg
 notes_tbl: .db do, re, mi, fa, so, la, si, do2, ; Do Major
  .db so, la, si, do2, re2, mi2, fad2, so2, ; Sol Major
