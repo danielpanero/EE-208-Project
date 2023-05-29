@@ -284,6 +284,7 @@ settings_loop:
     PRINTF LCD_putc
     .db CR, CR,  "Select :   ", LF, 0
     rcall LCD_lf
+    
 settings_loop_scales_text:
     cpi var, SETTINGS_MENU_SCALES
     brne settings_loop_duration_text
@@ -423,19 +424,19 @@ settings_duration_loop:
 
 ; ========================================================================================
 ; Menu > Settings > Threshold
-; FIXME better input
 settings_threshold:
-    EEPROM_READ threshold_address, b0
+    EEPROM_READ threshold_address, d0
 
     call LCD_clear
 settings_threshold_loop:
     PRINTF LCD_putc
-    .db CR, CR, "Threshold =", FDEC|FDIG3, b, "/  ", CR, 0
+    .db CR, CR, "Threshold :", FDEC|FDIG3, d, "   ", CR, 0
 
-    CIN_CYCLIC b0, 0, (analog_max_value + 1) / (notes_tbl_index_max+2), settings_threshold_loop
+    ;CIN_NUM_CYC d0, 0, (analog_max_value + 1) / (notes_tbl_index_max+2), settings_threshold_loop
+    CIN_NUM d0, settings_threshold_loop
 
-    EEPROM_WRITE_REG threshold_address, b0
-    sts threshold_address, b0
+    EEPROM_WRITE_REG threshold_address, d0
+    sts threshold_address, d0
 
     rjmp main
 

@@ -150,6 +150,7 @@ cin_cyclic_end_%:
 
 .endmacro
 
+; FIXME stabelize it
 ; in @0 register, @1 address for updating the screen while waiting
 .macro CIN_NUM
     cli
@@ -200,6 +201,66 @@ cin_num_ret_%:
     jmp @1
 
 cin_num_end_%:
+    POP5 command, a0, b0, c0, c1
+    sei
+.endmacro
+
+; FIXME stabelize it
+; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
+.macro CIN_NUM_CYC
+    cli
+    PUSH5 command, a0, b0, c0, c1
+cin_num_cyc_loop_%:
+    CB_POP events_buffer, events_buffer_length, command
+    brtc PC+2
+    rjmp cin_num_cyc_ret_% ; Branch if empty (T=1)
+
+cin_num_cyc_enter_%:
+    cpi command, ENTER
+    brne PC+2
+    rjmp cin_num_cyc_end_%
+
+cin_num_cyc_%:
+    ; Check if it is a number
+    cpi command, MAX_NUMBER_RANGE + 1
+
+    brlo PC+2
+    rjmp cin_num_cyc_loop_%
+
+    ; Multiply the number before by ten
+    CLR2 c0, c1
+
+    mov a0, @0
+    ldi b0, 10
+    
+    call mul11
+
+    _cpi c1, 0x00
+    breq PC+4
+    _ldi @0, @2
+    rjmp cin_num_cyc_loop_%
+
+    ; Add the event number
+    mov @0, c0
+    add @0, command
+
+    ; Checking for overflow
+    brcc PC+3
+    _ldi @0, @2
+
+    ; Checking if higher
+    _cpi @0, @2
+    brlo PC+3    
+    _ldi @0, @2
+
+    rjmp cin_num_cyc_loop_%
+
+cin_num_cyc_ret_%:
+    POP5 command, a0, b0, c0, c1
+    sei
+    jmp @3
+
+cin_num_cyc_end_%:
     POP5 command, a0, b0, c0, c1
     sei
 .endmacro
@@ -278,7 +339,7 @@ cin_wait_key2_loop_%:
     brtc PC+2
     rjmp cin_wait_key2_return_% ; Branch if empty (T=1)
 
-    DBREGF "Command cyclic: ", FHEX, command
+    ;DBREGF "Command cyclic: ", FHEX, command
 
 cin_key_21_%:   
     cpi command, @0
