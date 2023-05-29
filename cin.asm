@@ -1,5 +1,6 @@
 ; TODO clean up and better names
 ; TODO add library description
+; TODO add wait for cin num and cin cyc
 
 .def command = r20
 
