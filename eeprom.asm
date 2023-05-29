@@ -24,7 +24,7 @@ eeprom_init:
 
     CA i2c_rep_start,EEPROM + R
 
-    rcall i2c_read
+    call i2c_read
     mov @1, a0
 
     rcall i2c_no_ack
@@ -51,7 +51,7 @@ eeprom_init:
 	CA i2c_write, low(@0)
 
     mov a0, @1
-    rcall i2c_write
-    rcall i2c_stop
+    call i2c_write
+    call i2c_stop
     WAIT_US 2000
 .endmacro

@@ -16,6 +16,7 @@ record_buffer:
 .cseg
 record_init:
     CB_init record_buffer
+    rcall record_load_EEPROM
     ret
 
 record_push:

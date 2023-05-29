@@ -57,12 +57,11 @@ reset:
 .equ REPLAYING = 1
 .equ SETTINGS_MENU = 2
 
-; FIXME implement loading / saving from EEProm music buffe
-
 .equ SETTINGS_MENU_SCALES = 0
 .equ SETTINGS_MENU_DURATION = 1
 .equ SETTINGS_MENU_THRESHOLD = 2
 .equ SETTINGS_MENU_RESET = 3
+
 
 ; ========================================================================================
 ; Main menu
@@ -179,7 +178,7 @@ play_and_record_loop:
 play_and_record_stop:
     rcall LCD_clear
     PRINTF LCD_putc
-    .db CR, CR, "Playback? [Y/N]", 0
+    .db CR, CR, "Save the recording? [Y/N]", 0
 
 play_and_record_stop_loop:
     CIN_YES_NO play_and_record_stop_loop
@@ -187,8 +186,22 @@ play_and_record_stop_loop:
 play_and_record_stop_jmp_tbl:
     brts PC + 2
     rjmp play_and_record
-    rjmp play_from_record
 
+    rcall record_save_EEPROM
+    
+play_and_record_ask_playback:
+    rcall LCD_clear
+    PRINTF LCD_putc
+    .db CR, CR, "Playback? [Y/N]", 0
+
+play_and_record_ask_playback_loop:
+    CIN_YES_NO play_and_record_ask_playback_loop
+
+play_and_record_ask_playback_jmp_tbl:
+    brts PC + 2
+    rjmp play_free
+
+    rjmp play_from_record
 
 ; ========================================================================================
 ; Menu > Playback
