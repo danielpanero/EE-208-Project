@@ -27,8 +27,8 @@ eeprom_init:
     call i2c_read
     mov @1, a0
 
-    rcall i2c_no_ack
-	rcall i2c_stop
+    call i2c_no_ack
+	call i2c_stop
     WAIT_US 2000
 
 .endmacro 
