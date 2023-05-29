@@ -103,7 +103,7 @@ cin_remote_service_routine_end:
     CB_init events_buffer
 .endmacro
 
-; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting
+; in @0 register, @1 lower limit, @2 upper limit, @3 address for updating the screen while waiting, @4 interrupt key, @5 interrupt address
 .macro CIN_CYCLIC
     ;DBMSG "Start:"
     cli
@@ -121,6 +121,11 @@ cin_cyclic_enter_%:
     cpi command, ENTER
     brne PC+2
     rjmp cin_cyclic_end_%
+
+cin_cyclic_key_interrupt%:   
+    cpi command, @4
+    brne PC+2
+    rjmp @5
 
 cin_cyclic_arrow_up_%:   
     cpi command, ARROW_UP
@@ -265,7 +270,7 @@ cin_num_cyc_end_%:
     sei
 .endmacro
 
-; in @0 address for updating the screen while waiting
+; in @0 address for updating the screen while waiting, @1 interrupt key, @2 interrupt address
 .macro CIN_YES_NO
     cli
     push command
@@ -276,6 +281,11 @@ cin_yes_no_loop_%:
 
     brtc PC+2
     rjmp cin_yes_no_ret_% ; Branch if empty (T=1)
+
+cin_cyclic_key_interrupt%:   
+    cpi command, @1
+    brne PC+2
+    rjmp @2
 
 cin_yes_%:   
     cpi command, YES

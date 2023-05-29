@@ -96,7 +96,7 @@ main_loop_settings_text:
     rjmp main_loop_end
 
 main_loop_end:
-    CIN_CYCLIC var, PLAYING, SETTINGS_MENU, main_loop
+    CIN_CYCLIC var, PLAYING, SETTINGS_MENU, main_loop, HOME, main
 
 main_loop_jmp_tbl:
     cpi var, PLAYING
@@ -120,7 +120,7 @@ play:
     PRINTF LCD_putc
     .db CR, CR, "Recording? [Y/N]", 0
 play_loop:
-    CIN_YES_NO play_loop
+    CIN_YES_NO play_loop, HOME, main
 
 play_loop_jmp_tbl:
     brts PC + 2
@@ -183,7 +183,7 @@ play_and_record_stop:
     .db CR, "           [Y/N]", 0
 
 play_and_record_stop_loop:
-    CIN_YES_NO play_and_record_stop_loop
+    CIN_YES_NO play_and_record_stop_loop, HOME, main
 
 play_and_record_stop_jmp_tbl:
     brts PC + 2
@@ -197,7 +197,7 @@ play_and_record_ask_playback:
     .db CR, CR, "Playback? [Y/N]", 0
 
 play_and_record_ask_playback_loop:
-    CIN_YES_NO play_and_record_ask_playback_loop
+    CIN_YES_NO play_and_record_ask_playback_loop, HOME, main
 
 play_and_record_ask_playback_jmp_tbl:
     brts PC + 2
@@ -207,7 +207,7 @@ play_and_record_ask_playback_jmp_tbl:
 
 ; ========================================================================================
 ; Menu > Playback
-
+; FIXME fix after recording (it works after reset)
 play_from_record:
     rcall LCD_clear
     rcall record_rewind
@@ -229,7 +229,7 @@ play_from_record_empty:
     .db CR, CR, "Record? [Y/N]", 0
 
 play_and_record_empty_loop:
-    CIN_YES_NO play_and_record_empty_loop
+    CIN_YES_NO play_and_record_empty_loop, HOME, main
 
 play_and_record_empty_jmp_tbl:
     brtc PC + 2
@@ -266,7 +266,7 @@ play_from_record_stop:
     .db CR, "           [Y/N]", 0
 
 play_from_record_stop_loop:
-    CIN_YES_NO play_from_record_stop_loop
+    CIN_YES_NO play_from_record_stop_loop, HOME, main
 
 play_from_record_stop_jmp_tbl:
     brtc PC + 2
@@ -317,7 +317,7 @@ settings_loop_reset_text:
     rjmp settings_loop_end
 
 settings_loop_end:
-    CIN_CYCLIC var, SETTINGS_MENU_SCALES, SETTINGS_MENU_RESET, settings_loop
+    CIN_CYCLIC var, SETTINGS_MENU_SCALES, SETTINGS_MENU_RESET, settings_loop, HOME, main
 
 settings_loop_jmp_tbl:
     cpi var, SETTINGS_MENU_SCALES
@@ -393,7 +393,7 @@ setting_scales_SiM_text:
     rjmp setting_scales_loop_end
 
 setting_scales_loop_end:
-    CIN_CYCLIC b0, scales_tbl_index_min, scales_tbl_index_max, settings_scales_loop
+    CIN_CYCLIC b0, scales_tbl_index_min, scales_tbl_index_max, settings_scales_loop, HOME, main
     EEPROM_WRITE_REG scale_address, b0
     sts scale_address, b0
 
@@ -448,7 +448,7 @@ settings_reset:
     PRINTF LCD_putc
     .db CR, CR, "Reset? [Y/N]", 0
 settings_reset_loop:
-    CIN_YES_NO settings_reset_loop
+    CIN_YES_NO settings_reset_loop, HOME, main
 
 settings_reset_jmp_tbl:
     brts PC + 2
