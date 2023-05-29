@@ -210,15 +210,28 @@ play_from_record:
     rcall LCD_clear
     rcall record_rewind
 
-    ; check if buffer is empty
+    ; Check if buffer is empty
     lds	b3, record_buffer+_nbr
     tst b3
-    brne play_from_record_not_empty
+
+    breq PC +2
+    rjmp play_from_record_not_empty
+
     PRINTF LCD_putc
     .db CR, CR, "Nothing to play!", 0
     WAIT_MS 1000
 
-    ; FIXME ask if recording
+play_from_record_empty:
+    rcall LCD_clear
+    PRINTF LCD_putc
+    .db CR, CR, "Record? [Y/N]", 0
+
+play_and_record_empty_loop:
+    CIN_YES_NO play_and_record_empty_loop
+
+play_and_record_empty_jmp_tbl:
+    brtc PC + 2
+    rjmp play_and_record
     rjmp main
     
 play_from_record_not_empty:
