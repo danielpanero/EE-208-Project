@@ -158,6 +158,12 @@ play_and_record:
 
     PRINTF LCD_putc
     .db CR, CR, "Recording", "       ", CR, 0
+
+    rcall LCD_lf
+
+    ; Preloading a1, a0 to the progress bar
+    ldi a1, 15; 
+    ldi a0, 61 ; = in ascii code
     rjmp play_and_record_loop
 
 play_and_record_sound_mute_unmute:
@@ -171,6 +177,11 @@ play_and_record_loop:
 
     brtc PC+2
     rcall play_and_record_stop; If the buffer is full
+
+    dec a1
+    brne PC+4
+    rcall LCD_putc
+    ldi a1, 15
 
     CIN_WAIT_KEY3 HOME, main, MUTE, play_and_record_sound_mute_unmute, STOP, play_and_record_stop
     rjmp play_and_record_loop
@@ -244,6 +255,17 @@ play_from_record_not_empty:
     PRINTF LCD_putc
     .db CR, CR, "Playing back", 0
 
+    rcall LCD_lf
+
+    ; Preloading b1, a1, a0 to the progress bar
+    lds a0, record_buffer+_nbr
+    ldi b0, 16
+    call div11 ; Dividing the stored buffer to find the length of a unit in the progress bar
+
+    mov a1, c0
+    mov b1, c0
+    ldi a0, 61 ; = in ascii code
+
     rjmp play_from_record_loop
 
 play_from_record_sound_mute_unmute:
@@ -254,6 +276,11 @@ play_from_record_loop:
 
     brtc PC+2
     rcall play_from_record_stop; If the buffer is empty
+
+    dec a1
+    brne PC+4
+    rcall LCD_putc
+    mov a1, b1
 
     rcall sound_play_note
 
